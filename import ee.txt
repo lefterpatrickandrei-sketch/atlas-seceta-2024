@@ -1,0 +1,4 @@
+import ee
+ee.Authenticate()
+ee.Initialize(project='gisday2026')
+print(ee.Number(1).add(1).getInfo())

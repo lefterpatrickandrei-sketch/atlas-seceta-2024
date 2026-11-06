@@ -1,0 +1,17 @@
+earthengine-api
+geopandas
+pyarrow
+shapely
+rasterio
+rasterstats
+lightgbm
+shap
+scikit-learn
+pystac-client
+planetary-computer
+matplotlib
+numpy
+scipy
+pillow
+nbformat
+# ftw-tools se instalează separat în 02 (cere Python >=3.11,<3.13)

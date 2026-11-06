@@ -1,0 +1,9 @@
+data/raw/
+data/interim/
+data/private/
+*.tif
+*.ckpt
+*.zip
+__pycache__/
+.ipynb_checkpoints/
+.venv/
