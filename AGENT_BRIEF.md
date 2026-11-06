@@ -19,8 +19,13 @@ O hartă-erou pentru GIS Day 2026 (18 nov., FIFIM; organizatori AgroCliN și UGR
 - Descărcate manual: CLMS HR-VPP (actualizarea 2024 publicată pe 13.10.2025) în `data/raw/hrvpp/`; CLMS Small Landscape Features 2021 în `data/raw/slf/`; LUCAS 2018 Topsoil în `data/private/`.
 - Parcele: Fields of The World (`ftw-tools`, MIT; checkpoint `3_Class_FULL_FTW_Pretrained.ckpt`, uz necomercial), scene Sentinel-2 L2A de pe Planetary Computer.
 
-## Starea curentă
-- 00–04 scrise. 04 și părțile locale din 02/03 testate pe date sintetice; celulele Earth Engine și FTW netestate.
+## Starea curentă (06.11.2026)
+- Secrete: doar în `.env` (vezi `.env.example`) și `data/private/` (cheia CLMS `clms_service_key.json`), ambele în afara git.
+- S2 gata: Small Landscape Features 2021 (SWF + WVL, raster 5 m, EPSG:3035) în `data/raw/slf/` (`03a_download_slf.ipynb`).
+- S1 în așteptare: `03a_download_hrvpp.ipynb` e scris; descărcarea HR-VPP cere `WEKEO_USER`/`WEKEO_PASSWORD` în `.env`. LUCAS 2018 lipsește din `data/private/`.
+- S3 gata (Colab A100): 13.455 parcele FTW ≥ 0,5 ha (664 km², 39% din AOI), fără gol la 24° E → `data/out/parcels.parquet`. Ferestre S2: 1 apr–31 mai și 1–18 iul 2024 (aceeași procesare 05.10); ftw-tools 1.4.3 + torchgeo 0.7.2.
+- S4 gata fără HR-VPP și LUCAS: `data/out/parcel_features.parquet`, ținta de rezervă `ndvi_ja_z_2024`. Consumul EECU nu a fost măsurat. Cache-ul `data/interim/gee_batches/` se șterge dacă se regenerează parcelele.
+- S5: 7 factori (relief, SoilGrids, cultură, suprafață) → R² spațial 0,003 (sub pragul 0,3): decizie metodologică în așteptare. Lipsesc factorii irigat, canal, vânt; `dist_canal_m` nu are încă sursă de date.
 
 ## De construit (în ordine)
 1. **03b · Irigat 2024 (Ideea 1).** Etichete: ~200 de parcele digitizate în QGIS (`data/out/irrigation_labels.gpkg`, coloana `irigat` 0/1; pivoții circulari sunt exemple sigure). Factori: indicii lunari 2024 din `parcel_gee_stats.parquet` + ploaia ERA5-Land. Clasificator Random Forest/LightGBM, validare pe blocuri spațiale → coloana `irrigated_prob` în `parcel_features.parquet`. Metodă de referință: Pageot et al. 2020, doi:10.3390/rs12183044.
