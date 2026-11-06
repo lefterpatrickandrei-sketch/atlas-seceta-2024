@@ -7,3 +7,15 @@ data/private/
 __pycache__/
 .ipynb_checkpoints/
 .venv/
+.venv-ftw/
+
+# Secrete — nu intră niciodată în git (se citesc din .env sau din data/private/)
+.env
+.env.*
+!.env.example
+API-*.txt
+.hdarc
+*service_key*.json
+*credentials*.json
+*client_secret*.json
+*private_key*.json
