@@ -1,0 +1,18 @@
+{
+ "target": "ndvi_ja",
+ "r2_spatial": 0.125,
+ "rmse": 0.1031,
+ "n_parcels": 4160,
+ "n_blocks": 81,
+ "factors": [
+  "dist_canal_m",
+  "dist_network_m",
+  "wind_exposure",
+  "slope",
+  "elev",
+  "soc_sg_top",
+  "sand_sg_top",
+  "clay_sg_top",
+  "area_ha"
+ ]
+}

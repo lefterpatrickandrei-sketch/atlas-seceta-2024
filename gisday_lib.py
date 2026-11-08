@@ -272,3 +272,29 @@ def overpass_elements(query, mirrors=OVERPASS_MIRRORS, tries=3, wait_s=30, post=
                 return response.json()['elements']
         time.sleep(wait_s)
     raise RuntimeError(f'Overpass indisponibil (ultimul cod HTTP: {code})')
+
+
+# ---- Clasificatorul de irigare ---------------------------------------------------------------------------------------
+MIN_LABELS_PER_CLASS = 10
+LGB_CLASSIFIER = dict(n_estimators=300, learning_rate=0.05, num_leaves=15, min_child_samples=5, subsample=0.8,
+                      subsample_freq=1, colsample_bytree=0.8, verbose=-1)
+
+
+def block_folds(y, groups, n_splits=5, seed=2024):
+    """Împărțiri antrenare/test în care un bloc de 5 km apare doar într-o parte."""
+    from sklearn.model_selection import StratifiedGroupKFold
+    return list(StratifiedGroupKFold(n_splits=n_splits, shuffle=True, random_state=seed).split(y, y, groups))
+
+
+def out_of_fold_probabilities(X, y, groups, n_splits=5, seed=2024):
+    """Probabilitatea de irigare a fiecărei parcele etichetate, prezisă de un model care nu i-a văzut blocul."""
+    import lightgbm as lgb
+    import numpy as np
+    counts = y.value_counts()
+    if len(counts) < 2 or counts.min() < MIN_LABELS_PER_CLASS:
+        raise ValueError(f'Prea puține etichete pe clasă: {counts.to_dict()} (minimum {MIN_LABELS_PER_CLASS})')
+    out = np.zeros(len(y))
+    for train, test in block_folds(y, groups, n_splits, seed):
+        model = lgb.LGBMClassifier(**LGB_CLASSIFIER, random_state=seed).fit(X.iloc[train], y.iloc[train])
+        out[test] = model.predict_proba(X.iloc[test])[:, 1]
+    return out
