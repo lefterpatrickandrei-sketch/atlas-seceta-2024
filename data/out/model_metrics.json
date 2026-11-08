@@ -1,18 +1,43 @@
 {
- "target": "ndvi_ja",
- "r2_spatial": 0.125,
- "rmse": 0.1031,
- "n_parcels": 4160,
- "n_blocks": 81,
+ "target": "hrvpp_tprod_z",
+ "r2_spatial": 0.183,
+ "r2_folds_mean": 0.18,
+ "fold_r2": [
+  0.124,
+  0.244,
+  0.164,
+  0.145,
+  0.222
+ ],
+ "rmse": 1.3889,
+ "rmse_folds_mean": 1.388,
+ "fold_rmse": [
+  1.361,
+  1.366,
+  1.302,
+  1.452,
+  1.459
+ ],
+ "r2_baseline_mean": -0.0004,
+ "rmse_baseline_mean": 1.5374,
+ "r2_by_group": {
+  "toamna": 0.022,
+  "primavara": 0.048,
+  "neclasificat": -0.065
+ },
+ "n_parcels": 13230,
+ "n_blocks": 82,
  "factors": [
-  "dist_canal_m",
-  "dist_network_m",
-  "wind_exposure",
-  "slope",
   "elev",
+  "slope",
   "soc_sg_top",
   "sand_sg_top",
   "clay_sg_top",
-  "area_ha"
+  "wind_exposure",
+  "dist_canal_m",
+  "dist_network_m",
+  "area_ha",
+  "tip_cultura_2024_num",
+  "tprod_mean_2017_2023"
  ]
 }

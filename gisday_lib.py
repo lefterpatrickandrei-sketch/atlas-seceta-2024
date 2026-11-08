@@ -298,3 +298,30 @@ def out_of_fold_probabilities(X, y, groups, n_splits=5, seed=2024):
         model = lgb.LGBMClassifier(**LGB_CLASSIFIER, random_state=seed).fit(X.iloc[train], y.iloc[train])
         out[test] = model.predict_proba(X.iloc[test])[:, 1]
     return out
+
+
+# ---- WEkEO ------------------------------------------------------------------------------------------------------------
+def wekeo_client(env):
+    """Clientul `hda` din variabilele de mediu: WEKEO_TOKEN (din portal) sau WEKEO_USER + WEKEO_PASSWORD.
+
+    `hda` știe doar utilizator + parolă, așa că tokenul din portal se pune direct în client (api.py:600-618) și e folosit
+    până când serverul îl refuză. Valorile nu se afișează niciodată.
+    """
+    import time
+    from hda import Client, Configuration
+    kwargs = dict(retry_max=20, sleep_max=60, progress=False)
+    token = env.get('WEKEO_TOKEN')
+    if token:
+        client = Client(config=Configuration(user='token', password='token'), **kwargs)
+        client._access_token = token
+        client._token_expiration = int(time.time()) + 7 * 24 * 3600
+        return client
+    if env.get('WEKEO_USER') and env.get('WEKEO_PASSWORD'):
+        return Client(config=Configuration(user=env['WEKEO_USER'], password=env['WEKEO_PASSWORD']), **kwargs)
+    raise ValueError('Lipsesc credențialele WEkEO: pune în .env WEKEO_TOKEN sau WEKEO_USER și WEKEO_PASSWORD')
+
+
+def is_complete(folder, product_id, expected_size):
+    """Produsul e descărcat complet doar dacă există un fișier cu dimensiunea din catalog (o conexiune ruptă lasă unul mai mic)."""
+    from pathlib import Path
+    return any(p.stat().st_size == expected_size for p in Path(folder).glob(f'{product_id}*') if p.is_file())

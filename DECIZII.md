@@ -21,7 +21,11 @@ O decizie schimbată nu se șterge: se marchează „înlocuită de Dnn”. Oric
 | D13 | 08.11.2026 | `irrigated_prob` e strat de hartă, nu factor. Nici `crop` 2022 nu mai e factor. | idem |
 | D14 | 08.11.2026 | Tăieri: Carbon LUCAS doar dacă arhiva ajunge până pe 10.11, 18:00; Valul recoltei doar dacă modelul e validat până pe 12.11; scenariul perdelelor doar după ce harta-erou e gata. | idem |
 | D15 | 08.11.2026 | Harta-erou și video-ul se îngheață pe 14.11; prezentarea e gata pe 17.11. | idem |
-| D16 | 08.11.2026 | 03b trece pe etichete slabe automate + 80 de parcele validate de Patrick. Înlocuiește planul cu ~200 de parcele digitizate și etichetele AI din 08.11. Detaliile sunt la Q2. | Mesajul lui Patrick, 08.11.2026 |
+| D16 | 08.11.2026 | 03b trece pe etichete slabe automate + 80 de parcele validate de Patrick. Înlocuiește planul cu ~200 de parcele digitizate și etichetele AI din 08.11. Detaliile sunt la D18. | Mesajul lui Patrick, 08.11.2026 |
+| D17 | 08.11.2026 | Ținta = z-score HR-VPP TPROD 2024 față de 2017–2023, pe parcelă. Harta-erou afișează `vuln_score` 0–100 (percentilă), nu unități TPROD. Se rerulează 04 pe această țintă, apoi harta; dacă R² spațial < 0,3, oprire și raportare la Patrick. | Mesajul lui Patrick, 08.11.2026 (Q1) |
+| D18 | 08.11.2026 | Etichetele AI rămân doar pentru antrenare, marcate „AI, neverificate”. Se propune regula Sentinel-1 (umezire fără ploaie, ERA5-Land) pentru pozitive suplimentare, cu pragurile arătate pe 5 parcele. Se pregătesc 80 de parcele pentru validarea lui Patrick: 40 prezise irigate + 40 neirigate, răspândite în toată zona, cu foi și `labels.csv` doar pentru ele. Acuratețea se raportează doar pe acestea. | Mesajul lui Patrick, 08.11.2026 (Q2) |
+| D19 | 08.11.2026 | **Limita versiunilor HR-VPP (`V101` în 2017–2020 vs `V105` în 2021–2024):** în catalogul WEkEO (`data/raw/hrvpp/search_results.json`), `V105` există doar pentru 2021–2024, iar 2017–2020 există exclusiv în `V101`. Pe parcele stabile non-arabile ($N=474$), diferența mediană `V105 − V101` e +87,0 unități (+7,0%), iar pe monocultură arabilă ($N=102$) e −2,5% (primăvară) și +2,3% (toamnă). Test de sensibilitate pe cele 13.237 parcele arabile: (1) cu offset aditiv +87,0 pe V101: Spearman $\rho = 0{,}9960$, deplasare pe `vuln_score` (0–100) mediană **1,22 puncte**, P90 **4,04 puncte**; (2) cu factor multiplicativ $\times 1{,}07$ pe V101: Spearman $\rho = 0{,}9982$, deplasare mediană **0,88 puncte**, P90 **2,80 puncte**. Se păstrează seria 2017–2023 completă, cu mențiunea limitei pe slide. | Mesajul lui Patrick, 08.11.2026 (Q3 + PAS A1–A2) |
+| D20 | 08.11.2026 | Ordinea de execuție: Q3, apoi Q1 (04 + hartă), apoi Q2, cu actualizarea `STATUS.md` și oprire după fiecare. | Mesajul lui Patrick, 08.11.2026 |
 
 ## Alese de agenți în cod (fără aprobare explicită)
 
@@ -37,8 +41,7 @@ O decizie schimbată nu se șterge: se marchează „înlocuită de Dnn”. Oric
 
 ## De decis (Patrick)
 
-| Nr. | Întrebare |
-|---|---|
-| Q1 | Pe ce țintă rulează 04 și harta-erou: NDVI (doar culturi de primăvară, 4.161 parcele) sau HR-VPP (primăvară și toamnă, 9.895)? D03 pune HR-VPP pe primul loc, iar `parcel_target.parquet` e deja pe HR-VPP, dar 04 și harta sunt încă pe NDVI. Legat de asta: culturile de toamnă intră pe hartă și în model? |
-| Q2 | Pentru D16: regula etichetelor slabe automate, cum se aleg cele 80 de parcele și dacă intră la antrenare sau doar la validare. |
-| Q3 | Seria HR-VPP combină V101 (2017–2020) cu V105 (2021–2024). Se păstrează referința întreagă, cu mențiune pe slide, sau se restrânge? |
+| Nr. | Întrebare | Opțiuni / Propunere |
+|---|---|---|
+| **Q1-B2** | **Pragul pentru `z` extrem / abatere standard mică în `03e`:** pe parcelele cu `std_2017_2023 < 142,8` (P5), o variație normală dă `\|z\|` până la `19,9`. | **Propunere dublă:** (1) plafon inferior `std_min = 142,8` (P5 pe arabil, ~15% din mediana `TPROD`) la numitorul lui `z`, sau (2) winsorizare `loss ∈ [−3,5, +3,5]` (P1..P99), care ridică $R^2$ spațial de la `0,183` la `0,214` și reduce RMSE de la `1,389` la `1,213`. |
+| **Q1-C4** | **Oprire obligatorie la `R² spațial = 0,183 < 0,3` în `04`:** aproape toată explicația globală ($R^2 = 0{,}183$) vine din contrastul `tip_cultura_2024` (primăvară `loss` median `+1,127` vs toamnă `+0,118`), iar în interiorul grupelor $R^2$ este `0,022` (toamnă) și `0,048` (primăvară). Cum continuăm spre PAS D (harta-erou)? | **(a)** Mergem la PAS D conform D11 (harta-erou afișează vulnerabilitatea observată / percentila `0–100`, iar modelul + SHAP rămân în panoul secundar cu `R² = 0,183` scris explicit pe slide).<br>**(b)** Calculăm `z` doar față de anii cu același tip de cultură sau doar pe culturile de primăvară.<br>**(c)** Aplicăm pragul B2 ales mai sus și apoi randăm PAS D. |
