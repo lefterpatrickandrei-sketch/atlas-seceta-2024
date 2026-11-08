@@ -99,25 +99,26 @@ def coverage_gaps(table, min_arable=8.0, min_ratio=0.2):
 
 
 # ---- Ținta: pierderea față de anii cu același tip de cultură ------------------------------------------------------------
-APR_AUTUMN, APR_SPRING = 0.5, 0.35      # NDVI aprilie: verde = cultură de toamnă, gol = cultură de primăvară
+APR_AUTUMN, APR_SPRING = 0.40, 0.40     # D21: împărțire binară la NDVI aprilie 0,40 (toamnă ≥ 0,40, primăvară < 0,40)
 AUTUMN_CROPS = {211, 212, 213, 214, 218, 232}   # EUCROPMAP: grâu comun, grâu durum, orz, secară, triticale, rapiță
 SPRING_CROPS = {216, 217, 221, 222, 231, 233}   # EUCROPMAP: porumb, orez, cartof, sfeclă de zahăr, floarea-soarelui, soia
 
 
-def crop_group(ndvi_apr):
-    """Tipul de cultură dintr-un an, după NDVI din aprilie: 'toamna', 'primavara' sau 'neclasificat'."""
+def crop_group(ndvi_apr, autumn=APR_AUTUMN, spring=APR_SPRING):
+    """Tipul de cultură dintr-un an, după NDVI din aprilie: 'toamna', 'primavara' sau 'neclasificat' (doar dacă NaN la prag binar)."""
     import numpy as np
     import pandas as pd
-    out = np.select([ndvi_apr >= APR_AUTUMN, ndvi_apr < APR_SPRING], ['toamna', 'primavara'], 'neclasificat')
+    out = np.select([ndvi_apr >= autumn, ndvi_apr < spring], ['toamna', 'primavara'], 'neclasificat')
     return pd.Series(out, index=ndvi_apr.index)
 
 
-def like_for_like_loss(df, value_fmt, group_fmt, target_year, base_years, min_ref=2, only_groups=None):
-    """Pierderea din `target_year` față de media anilor de referință în care parcela a avut același tip de cultură.
+def like_for_like_loss(df, value_fmt, group_fmt, target_year, base_years, min_ref=2, only_groups=None, agg='median'):
+    """Pierderea din `target_year` față de mediana (sau media) anilor de referință cu același tip de cultură (D21).
 
-    `value_fmt`/`group_fmt` dau numele coloanelor, de ex. 'ndvi_ja_{y}'. Întoarce ref, loss_obs, loss_pct, n_ref_years;
+    `value_fmt`/`group_fmt` dau numele coloanelor, de ex. 'tprod_{y}'. Întoarce ref, loss_obs, loss_rel, loss_pct, n_ref_years;
     cu mai puțin de `min_ref` ani de referință, sau pentru un grup neinclus în `only_groups`, pierderea e NaN.
     """
+    import warnings
     import numpy as np
     import pandas as pd
     group = df[group_fmt.format(y=target_year)]
@@ -129,12 +130,15 @@ def like_for_like_loss(df, value_fmt, group_fmt, target_year, base_years, min_re
         usable = usable & group.isin(list(only_groups)).to_numpy()
     same = (grps == group.to_numpy(dtype=object)[:, None]) & ~np.isnan(vals) & usable[:, None]
     n = same.sum(axis=1)
-    with np.errstate(invalid='ignore', divide='ignore'):
-        ref = np.where(same, vals, 0.0).sum(axis=1) / n
+    masked = np.where(same, vals, np.nan)
+    with warnings.catch_warnings(), np.errstate(invalid='ignore', divide='ignore'):
+        warnings.simplefilter('ignore', RuntimeWarning)
+        ref = np.nanmedian(masked, axis=1) if agg == 'median' else np.nanmean(masked, axis=1)
         ref[n < min_ref] = np.nan
         loss = ref - value
-        pct = loss / ref * 100
-    return pd.DataFrame({'ref': ref, 'loss_obs': loss, 'loss_pct': pct, 'n_ref_years': n}, index=df.index)
+        loss_rel = 1.0 - value / ref
+        pct = loss_rel * 100
+    return pd.DataFrame({'ref': ref, 'loss_obs': loss, 'loss_rel': loss_rel, 'loss_pct': pct, 'n_ref_years': n}, index=df.index)
 
 
 def crop_group_agreement(groups, crop_codes):

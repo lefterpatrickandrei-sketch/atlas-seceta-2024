@@ -24,8 +24,8 @@ def loss(values, groups, **kw):
 P, T, N = 'primavara', 'toamna', 'neclasificat'
 
 
-# ---- tipul de cultură din NDVI-ul din aprilie ----------------------------------------------------------------------------
-@pytest.mark.parametrize('ndvi, expected', [(0.6, T), (0.5, T), (0.2, P), (0.349, P), (0.35, N), (0.45, N), (np.nan, N)])
+# ---- tipul de cultură din NDVI-ul din aprilie (D21: prag binar 0,40) ---------------------------------------------------
+@pytest.mark.parametrize('ndvi, expected', [(0.6, T), (0.4, T), (0.399, P), (0.2, P), (np.nan, N)])
 def test_crop_group_uses_april_ndvi_thresholds(ndvi, expected):
     assert gl.crop_group(pd.Series([ndvi])).iloc[0] == expected
 
@@ -35,7 +35,15 @@ def test_loss_uses_only_years_with_the_same_crop_group():
     r = loss([0.65, 0.20, 0.55, 0.20, 0.35], [P, T, P, T, P])
     assert r.ref == pytest.approx(0.60)
     assert r.loss_obs == pytest.approx(0.25)
+    assert r.loss_rel == pytest.approx(1.0 - 0.35 / 0.60)
     assert r.n_ref_years == 2
+
+
+def test_loss_uses_median_of_reference_years():
+    r = loss([1000.0, 800.0, 2000.0, 400.0, 500.0], [P, P, P, T, P])
+    assert r.ref == pytest.approx(1000.0)
+    assert r.loss_rel == pytest.approx(0.5)
+    assert r.n_ref_years == 3
 
 
 def test_loss_is_expressed_also_as_percent_of_the_reference():

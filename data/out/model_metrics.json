@@ -1,31 +1,43 @@
 {
- "target": "hrvpp_tprod_z",
- "r2_spatial": 0.183,
- "r2_folds_mean": 0.18,
+ "target": "hrvpp_tprod_lfl_rel",
+ "r2_spatial": 0.086,
+ "r2_folds_mean": 0.0856,
  "fold_r2": [
-  0.124,
-  0.244,
-  0.164,
-  0.145,
-  0.222
+  0.0493,
+  0.109,
+  0.1267,
+  0.1079,
+  0.035
  ],
- "rmse": 1.3889,
- "rmse_folds_mean": 1.388,
+ "rmse": 0.468,
+ "rmse_folds_mean": 0.4674,
  "fold_rmse": [
-  1.361,
-  1.366,
-  1.302,
-  1.452,
-  1.459
+  0.4527,
+  0.4379,
+  0.4587,
+  0.4818,
+  0.506
  ],
- "r2_baseline_mean": -0.0004,
- "rmse_baseline_mean": 1.5374,
+ "r2_baseline_mean": -0.0005,
+ "rmse_baseline_mean": 0.4897,
  "r2_by_group": {
-  "toamna": 0.022,
-  "primavara": 0.048,
-  "neclasificat": -0.065
+  "toamna": 0.0058,
+  "primavara": 0.0033
  },
- "n_parcels": 13230,
+ "rmse_by_group": {
+  "toamna": 0.4899,
+  "primavara": 0.438
+ },
+ "r2_baseline_by_group": {
+  "toamna": -0.0021,
+  "primavara": -0.0049
+ },
+ "rmse_baseline_by_group": {
+  "toamna": 0.4918,
+  "primavara": 0.4398
+ },
+ "n_parcels_train": 11965,
+ "n_parcels_pred": 13230,
  "n_blocks": 82,
  "factors": [
   "elev",
