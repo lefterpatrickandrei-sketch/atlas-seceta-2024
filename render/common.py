@@ -6,7 +6,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from scipy import ndimage
 
 W, H = 1920, 1080
-FD = '/usr/share/fonts/opentype/inter/'
+FD = str(__import__('pathlib').Path(__file__).resolve().parent / 'fonts') + '/'   # Inter (licență OFL, render/fonts/LICENSE.txt)
 _fc = {}
 
 

@@ -21,5 +21,11 @@ CRS = 'EPSG:3844'             # Stereo 70 pentru toate livrabilele
 YEAR = 2024                   # sezonul secetei
 BASE_YEARS = list(range(2017, 2024))   # referința pentru anomalii
 
+# Fields of The World: ferestrele Sentinel-2 și versiunile testate împreună (02_parcels_ftw, scripts/ftw_colab.py)
+FTW_WIN_A = f'{YEAR}-04-01/{YEAR}-05-31'
+FTW_WIN_B = f'{YEAR}-07-01/{YEAR}-07-18'   # din ~23.07.2024 procesarea e 05.11, iar ftw-tools 1.4.3 nu combină versiuni diferite
+FTW_PKGS = ['ftw-tools==1.4.3', 'torchgeo==0.7.2']   # torchgeo >= 0.8 nu mai are clasa importată de ftw-tools 1.4.3
+FTW_RUN = 'v2'                             # eticheta rulării: INTERIM/ftw_poly_<tile>_<run>.parquet
+
 # Repo privat folosit ca punte între PC și runtime-ul Colab
 GITHUB_REPO = 'https://github.com/lefterpatrickandrei-sketch/gisday2026.git'

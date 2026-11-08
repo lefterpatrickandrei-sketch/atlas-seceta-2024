@@ -19,3 +19,7 @@ API-*.txt
 *credentials*.json
 *client_secret*.json
 *private_key*.json
+
+# Fonturile se aduc cu scripts/get_fonts.py; video-urile rămân locale
+render/fonts/
+*.mp4
