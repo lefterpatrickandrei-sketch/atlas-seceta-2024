@@ -86,3 +86,9 @@ def test_wind_rose_wraps_northerly_directions_into_the_zero_sector():
     az = np.radians(355.0)
     rose = gl.wind_rose(np.array([-np.sin(az)]), np.array([-np.cos(az)]))
     assert rose[0.0] == pytest.approx(1.0)
+
+
+def test_exposure_stays_within_bounds_with_rounded_weights():
+    dirs = (67.5, 90.0, 112.5, 135.0, 292.5, 45.0, 22.5)
+    weights = (0.084, 0.238, 0.253, 0.093, 0.075, 0.035, 0.027)
+    assert gl.wind_exposure(PARCEL, woody(), TRANSFORM, dirs, weights).iloc[0] <= 1.0

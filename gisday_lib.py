@@ -216,7 +216,7 @@ def wind_exposure(parcels, woody, transform, directions, weights, reach_m=SHELTE
             hit = np.zeros(inside.shape, dtype=bool)
             hit[inside] = woody[rows[inside], cols[inside]]
             out[i] += weight * (1 - hit.any(axis=1).mean())
-    return pd.Series(out, index=parcels.index, name='wind_exposure')
+    return pd.Series(np.clip(out, 0.0, 1.0), index=parcels.index, name='wind_exposure')   # suma ponderilor poate depăși 1 prin rotunjire
 
 
 def wind_rose(u, v, n_sectors=16):
@@ -249,3 +249,26 @@ def select_label_candidates(df, n_high=120, n_low=120, n_mid=60, max_per_block=8
     out = pd.concat(picked).sort_values('parcel_id')[['parcel_id', 'hint']].reset_index(drop=True)
     out['irigat'] = pd.Series([pd.NA] * len(out), dtype='Int8')
     return out
+
+
+OVERPASS_MIRRORS = ('https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter')
+
+
+def overpass_elements(query, mirrors=OVERPASS_MIRRORS, tries=3, wait_s=30, post=None):
+    """Rulează o interogare Overpass și întoarce elementele; trece la serverul următor când unul e ocupat."""
+    import time
+    import requests
+    post = post or requests.post
+    code = None
+    for _ in range(tries):
+        for url in mirrors:
+            try:
+                response = post(url, data={'data': query}, headers={'User-Agent': 'gisday2026/1.0'}, timeout=150)
+            except requests.exceptions.RequestException as err:     # server lent sau căzut: îl încercăm pe următorul
+                code = type(err).__name__
+                continue
+            code = response.status_code
+            if code == 200:
+                return response.json()['elements']
+        time.sleep(wait_s)
+    raise RuntimeError(f'Overpass indisponibil (ultimul cod HTTP: {code})')

@@ -169,3 +169,34 @@ def test_canal_distance_is_zero_for_a_parcel_crossed_by_a_canal():
     parcels = gpd.GeoDataFrame({'parcel_id': [1]}, geometry=[box(0, 0, 100, 100)], crs='EPSG:3844')
     ways = gpd.GeoDataFrame({'waterway': ['canal']}, geometry=[LineString([(50, -10), (50, 110)])], crs='EPSG:3844')
     assert gl.canal_distances(parcels, ways).dist_canal_m.iloc[0] == 0
+
+
+def _fake_post(codes):
+    calls = iter(codes)
+
+    def post(url, **kwargs):
+        code = next(calls)
+        return SimpleNamespace(status_code=code, json=lambda: {'elements': [{'id': 1}]})
+    return post
+
+
+def test_overpass_moves_to_the_next_server_when_one_is_busy():
+    assert gl.overpass_elements('q', mirrors=['a', 'b'], wait_s=0, post=_fake_post([502, 200])) == [{'id': 1}]
+
+
+def test_overpass_raises_after_all_attempts_fail():
+    with pytest.raises(RuntimeError, match='502'):
+        gl.overpass_elements('q', mirrors=['a'], tries=2, wait_s=0, post=_fake_post([502, 502]))
+
+
+def test_overpass_treats_a_timeout_as_a_busy_server():
+    import requests
+    calls = iter([requests.exceptions.ReadTimeout('lent'), SimpleNamespace(status_code=200, json=lambda: {'elements': [{'id': 2}]})])
+
+    def post(url, **kwargs):
+        result = next(calls)
+        if isinstance(result, Exception):
+            raise result
+        return result
+
+    assert gl.overpass_elements('q', mirrors=['a', 'b'], wait_s=0, post=post) == [{'id': 2}]
