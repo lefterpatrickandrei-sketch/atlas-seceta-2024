@@ -19,13 +19,15 @@ O hartă-erou pentru GIS Day 2026 (18 nov., FIFIM; organizatori AgroCliN și UGR
 - Descărcate manual: CLMS HR-VPP (actualizarea 2024 publicată pe 13.10.2025) în `data/raw/hrvpp/`; CLMS Small Landscape Features 2021 în `data/raw/slf/`; LUCAS 2018 Topsoil în `data/private/`.
 - Parcele: Fields of The World (`ftw-tools`, MIT; checkpoint `3_Class_FULL_FTW_Pretrained.ckpt`, uz necomercial), scene Sentinel-2 L2A de pe Planetary Computer.
 
-## Starea curentă (06.11.2026, verificată independent, commit `3f7c2fb`)
-- Secrete: doar în `.env` (vezi `.env.example`) și `data/private/` (cheia CLMS `clms_service_key.json`), ambele în afara git. Fișierele ajutătoare locale sunt excluse prin `.git/info/exclude`.
-- S2 gata: Small Landscape Features 2021 (SWF + WVL, raster 5 m, EPSG:3035) în `data/raw/slf/` (`03a_download_slf.ipynb`).
-- S1 în așteptare: `03a_download_hrvpp.ipynb` e scris; descărcarea HR-VPP cere `WEKEO_USER`/`WEKEO_PASSWORD` în `.env`. LUCAS 2018 lipsește din `data/private/`.
-- S3 gata (Colab A100, oprit după rulare): 13.455 parcele FTW ≥ 0,5 ha (664 km², 39% din AOI), fără dubluri și fără gol la 24° E → `data/out/parcels.parquet`. Ferestre S2: 1 apr–31 mai și 1–18 iul 2024 (aceeași procesare 05.10); ftw-tools 1.4.3 + torchgeo 0.7.2, `MPLBACKEND=Agg`. Notă: o parcelă mare de 383,7 ha merită verificată vizual în QGIS.
-- S4 gata fără HR-VPP și LUCAS: `data/out/parcel_features.parquet` (15 loturi grupate pe blocuri de 5 km, 215 s), ținta de rezervă `ndvi_ja_z_2024`. Consumul EECU nu a fost măsurat (se verifică în Cloud Console → Quotas pentru `earthengine.googleapis.com` pe proiectul `gisday2026`). Cache-ul `data/interim/gee_batches/` este indexat doar după numărul lotului și TREBUIE șters dacă se regenerează parcelele. Notă: `COPERNICUS/DEM/GLO30` este marcat depreciat (înlocuit de `COPERNICUS/DEM/GLO30_2024_1`), dar încă funcționează.
-- S5: 7 factori (relief, SoilGrids, cultură, suprafață) → R² spațial 0,003, RMSE 1,450 (și −0,001 cu cozile tăiate; sub pragul 0,3): decizie metodologică în așteptare. Lipsesc factorii irigat, canal, vânt; `dist_canal_m` nu are încă sursă de date (de ex. canalele din OSM). Notebook-urile 02–04 nu au output-uri salvate în celule (au rulat prin scripturi echivalente).
+## Starea curentă (08.11.2026)
+- Secrete: doar în `.env` (vezi `.env.example`) și `data/private/`, ambele în afara git. Fișierele ajutătoare locale sunt excluse prin `.git/info/exclude`.
+- Parcele: 17.466 FTW ≥ 0,5 ha (827 km², 76% din arabilul EUCROPMAP), până la 44,00° N, fără dubluri → `data/out/parcels.parquet`. `ftw-tools` pierde ultimul rând de ferestre din nord, de aceea rasterul se cere cu marjă (`gisday_lib.ftw_request_bbox`). Partea GPU: `scripts/ftw_colab.py`.
+- Trăsături și țintă: `parcel_features.parquet` (58 de coloane) și `parcel_target.parquet`: fiecare parcelă e comparată cu anii cu același tip de cultură. 4.161 parcele arabile de primăvară, pierdere mediană 0,139 NDVI; tipul din aprilie concordă 97,6% cu EUCROPMAP 2022. Sursa e NDVI iulie–august până sosește HR-VPP.
+- Factori: `parcel_canals.parquet` (OSM), `parcel_wind.parquet` și `wind_rose.parquet`.
+- Model (04): R² spațial 0,125, RMSE 0,103 NDVI (4.160 parcele, 81 de blocuri de 5 km); primii factori: altitudine, argilă, distanța la canal. Sub pragul 0,3, deci panou secundar.
+- Harta-erou, versiunea 1: `data/out/harta_erou.png` (`render/r1_hero.py`); adaugă singură insulele irigate când există `irrigation_2024.parquet`.
+- În așteptare: `.env` pentru HR-VPP; etichetele din `data/out/irrigation_labels.gpkg`, apoi `notebooks/03b_irrigation.ipynb`; consumul Earth Engine nemăsurat; arhiva LUCAS lipsește.
+- Rulare: `.venv/Scripts/python.exe -X utf8 scripts/run_nb.py notebooks/X.ipynb`; teste: `.venv/Scripts/python.exe -X utf8 -m pytest tests -q`; fonturi: `scripts/get_fonts.py`. Cache-ul `data/interim/gee_batches_<amprentă>` se invalidează singur când se schimbă parcelele sau benzile.
 
 ## Plan aprobat de Patrick (08.11.2026)
 Harta-erou și video-ul se îngheață pe 14.11, prezentarea e gata pe 17.11. Decizii aprobate:
@@ -47,7 +49,7 @@ Harta-erou și video-ul se îngheață pe 14.11, prezentarea e gata pe 17.11. De
 | Mar 17 | corecturi | repetiție |
 
 ## De construit (în ordine)
-1. **03b · Irigat 2024 (Ideea 1).** Etichete: ~200 de parcele digitizate în QGIS (`data/out/irrigation_labels.gpkg`, coloana `irigat` 0/1; pivoții circulari sunt exemple sigure). Factori: indicii lunari 2024 din `parcel_gee_stats.parquet` + ploaia ERA5-Land. Clasificator Random Forest/LightGBM, validare pe blocuri spațiale → coloana `irrigated_prob` în `parcel_features.parquet`. Metodă de referință: Pageot et al. 2020, doi:10.3390/rs12183044.
+1. **03b · Irigat 2024 (Ideea 1).** Etichete: ~200 de parcele digitizate în QGIS (`data/out/irrigation_labels.gpkg`, coloana `irigat` 0/1; pivoții circulari sunt exemple sigure). Factori: indicii lunari 2024 din `parcel_gee_stats.parquet` + ploaia ERA5-Land. Clasificator Random Forest/LightGBM, validare pe blocuri spațiale → `data/out/irrigation_2024.parquet` (`irrigated_prob`), strat de hartă, nu factor în 04. Metodă de referință: Pageot et al. 2020, doi:10.3390/rs12183044.
 2. **03c · Expunerea la vânt (Ideea 5).** Din ERA5-Land orar: direcția dominantă în orele cu temperatura peste 30 °C și fără ploaie. Pentru fiecare parcelă: există un element lemnos (SLF 2021) în amonte, la cel mult 20H (H = 15 m)? → `wind_exposure` 0–1. Apoi optimizarea perdelelor noi (greedy, buget în km) ca scenariu, cum arată macheta `render/m5_perdele.py`.
 3. **03d · Carbonul calibrat (Ideea 3).** Compozit de sol gol Sentinel-2 2017–2025 (primăvara, praguri NDVI/NBR2), LightGBM pe punctele LUCAS din zonă + covariabile DEM → `soc_lucas_model`; validare spațială. Rulează local dacă LUCAS nu e pe runtime.
 4. **06 · Valul recoltei (Ideea 2).** Serii la 10 zile S1 VH/VV + S2 NDVI/NBR2 pe parcelă, sezonul 2024 → ziua recoltării prin punct de ruptură (referință: Kavats et al. 2019, Remote Sensing 11(21):2496). Opțional coerență din SNAP.

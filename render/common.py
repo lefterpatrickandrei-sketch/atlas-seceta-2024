@@ -99,12 +99,13 @@ def draw_badge(img, text='MACHETĂ · DATE SIMULATE', right=1856, y=46):
     img.alpha_composite(b, (right - pw // 2, y))
 
 
-def draw_header(img, kicker, title, subtitle, accent=CYAN):
+def draw_header(img, kicker, title, subtitle, accent=CYAN, badge=True):
     d = ImageDraw.Draw(img)
     tracked(d, (64, 44), kicker.upper(), F(17, 'SemiBold'), accent, 2.2)
     d.text((61, 70), title, font=F(54, 'Bold', True), fill=TXT)
     d.text((64, 144), subtitle, font=F(23), fill=TXT2)
-    draw_badge(img)
+    if badge:      # hărțile cu date reale nu poartă ștampila de machetă
+        draw_badge(img)
 
 
 def draw_footer(img, left, right='GIS Day 2026 · 18 noiembrie · FIFIM, Amfiteatrul II 1'):
