@@ -143,10 +143,14 @@ def rate_gap(pool, hits):
     out = {}
     for name, hit in hits.items():
         e_sp, e_au = (np.bincount(idx[hit & m], minlength=len(blocks)) for m in (spring, ~spring))
-        diff = e_sp[draws].sum(axis=1) / n_sp[draws].sum(axis=1) - e_au[draws].sum(axis=1) / n_au[draws].sum(axis=1)
+        rate_sp, rate_au = e_sp[draws].sum(axis=1) / n_sp[draws].sum(axis=1), e_au[draws].sum(axis=1) / n_au[draws].sum(axis=1)
+        diff = rate_sp - rate_au
         out[name] = {'primavara_pct': r2(100 * e_sp.sum() / n_sp.sum()), 'toamna_pct': r2(100 * e_au.sum() / n_au.sum()),
                      'diferenta_pp': r2(100 * (e_sp.sum() / n_sp.sum() - e_au.sum() / n_au.sum())),
-                     'ic95_pp': [r2(v) for v in 100 * np.percentile(diff, [2.5, 97.5])]}
+                     'ic95_pp': [r2(v) for v in 100 * np.percentile(diff, [2.5, 97.5])],
+                     'ic95_primavara_pct': [r2(v) for v in 100 * np.percentile(rate_sp, [2.5, 97.5])],
+                     'ic95_toamna_pct': [r2(v) for v in 100 * np.percentile(rate_au, [2.5, 97.5])],
+                     'n_observatii': {'primavara': int(n_sp.sum()), 'toamna': int(n_au.sum()), 'blocuri': len(blocks)}}
     return out
 
 

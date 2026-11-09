@@ -174,7 +174,7 @@ def main():
 
     # Tabel anual 2017–2024
     card(img, (rx, 488, rx + rw, 988))
-    section_label(d, rx + 20, 504, 'Valori anuale TPROD: mediană (P25–P75) și număr de parcele')
+    section_label(d, rx + 20, 504, 'Valori anuale TPROD: mediană (P25–P75) și N parcele')
     headers = [('An', rx + 20), ('Primăvară: med. (P25–P75) · N', rx + 88), ('Toamnă: med. (P25–P75) · N', rx + 334)]
     for h_txt, hx in headers:
         d.text((hx, 534), h_txt, font=F(13, 'SemiBold'), fill=MUTED)

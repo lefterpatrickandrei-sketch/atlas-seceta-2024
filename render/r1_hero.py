@@ -19,7 +19,7 @@ from rasterio.transform import Affine  # noqa: E402
 from rasterio.warp import Resampling, reproject  # noqa: E402
 
 import atlas  # noqa: E402
-from common import (BG, GRID, LINE, MUTED, PW, PX0, TXT, TXT2, F, card, draw_footer, draw_header, fmt_dec, fmt_int,  # noqa: E402
+from common import (BG, GRID, LINE, MUTED, PW, PX0, TXT, TXT2, F, Layer, card, draw_footer, draw_header, fmt_dec, fmt_int,  # noqa: E402
                     new_canvas, north_arrow, scale_bar, section_label)
 from gisday_config import AOI_BBOX, CRS, GEE_PROJECT, INTERIM, OUT, RAW  # noqa: E402
 from gisday_lib import overpass_elements  # noqa: E402
@@ -29,6 +29,7 @@ SS = 2                                  # supraeșantionare pentru margini curat
 INSET = (76, 628, 340, 224)             # x, y, w, h pe pânză: colțul de sud-vest, fără culturi (Dunărea și malul bulgăresc)
 INSET_PX_M = 10.0
 CANAL_RGB = (96, 176, 226)
+PIVOT_RGB = (237, 240, 243)     # contur fin, distinct de canale și de non-arabil
 TOWNS = ['Sadova', 'Bechet', 'Dăbuleni', 'Corabia']
 
 
@@ -218,26 +219,25 @@ def draw_group_distribution(img, x0, y0, width, modeled):
                 d.text((tx - F(12).getlength(t_str) / 2, ax_y + 13), t_str, font=F(12), fill=MUTED)
 
 
-def draw_irrigation_panel(img, x0, y0, width, metrics):
-    """Panou 3: Irigat vs neirigat pe clasele radar din Varianta B (toate parcelele de primăvară cu țintă, fără nedeterminat)."""
+def draw_radar_panel(img, x0, y0, width, placebo):
+    """Panou 3 (D30): regula radar, testul placebo pe miriștile de toamnă și concluzia. Cifrele vin din diagnosticul S1."""
     d = ImageDraw.Draw(img)
-    p3 = metrics.get('panou3_radar_varianta_b', {})
-    ir = p3.get('irigat', {})
-    ne = p3.get('neirigat', {})
-    diff = p3.get('diff_median_pct', 0.0)
-    ci = p3.get('diff_ci95_pct', [0.0, 0.0])
-    n_blk = p3.get('n_blocks', 81)
+    events = placebo['toate']
+    d.text((x0, y0), 'Regula: VV crește cu cel puțin 1,5 dB în 12 zile, fără ploaie.', font=F(15, 'Medium'), fill=TXT2)
+    big = F(32, 'Bold', True)
+    for offset, value, line1, line2 in ((0, events['primavara_pct'], 'evenimente pe culturile', 'de primăvară'),
+                                        (292, events['toamna_pct'], 'evenimente pe miriști', 'de toamnă (placebo)')):
+        number = f'{fmt_dec(value, 2)}%'
+        d.text((x0 + offset, y0 + 26), number, font=big, fill=TXT)
+        text_x = x0 + offset + big.getlength(number) + 12
+        d.text((text_x, y0 + 30), line1, font=F(14), fill=TXT2)
+        d.text((text_x, y0 + 49), line2, font=F(14), fill=TXT2)
+    signed = lambda v: fmt_signed_pct(v, 2).rstrip('%')  # noqa: E731
+    low, high = events['ic95_pp']
+    d.text((x0, y0 + 76), f"Diferență: {signed(events['diferenta_pp'])} pp (IC 95%: {signed(low)}…{signed(high)} pp), bootstrap pe blocuri de 5 km.", font=F(13), fill=MUTED)
+    d.line((x0, y0 + 100, x0 + width, y0 + 100), fill=LINE, width=1)
+    d.text((x0, y0 + 110), 'Semnalul radar din august nu separă irigarea.', font=F(21, 'SemiBold'), fill=TXT)
 
-    d.text((x0, y0), f"Irigat (S1 aug. + pivoți, N = {fmt_int(ir.get('n', 506))}):", font=F(15, 'SemiBold'), fill=(96, 198, 232))
-    d.text((x0 + 282, y0), f"med. {fmt_signed_pct(ir.get('median_pct', 32.0), 1)} (P25–P75: {fmt_signed_pct(ir.get('p25_pct', 6.3), 1)}…{fmt_signed_pct(ir.get('p75_pct', 49.7), 1)})", font=F(15, 'Bold'), fill=TXT)
-
-    d.text((x0, y0 + 26), f"Neirigat (S1 uscat, N = {fmt_int(ne.get('n', 3645))}):", font=F(15, 'SemiBold'), fill=TXT2)
-    d.text((x0 + 282, y0 + 26), f"med. {fmt_signed_pct(ne.get('median_pct', 30.0), 1)} (P25–P75: {fmt_signed_pct(ne.get('p25_pct', 1.1), 1)}…{fmt_signed_pct(ne.get('p75_pct', 52.1), 1)})", font=F(15, 'Bold'), fill=TXT)
-
-    d.line((x0, y0 + 52, x0 + width, y0 + 52), fill=LINE, width=1)
-    d.text((x0, y0 + 60), f"Diferență mediane (irigat − neirigat): {fmt_signed_pct(diff, 1)} pp (IC 95% bootstrap {n_blk} blocuri: {fmt_signed_pct(ci[0], 1)}…{fmt_signed_pct(ci[1], 1)} pp)", font=F(13, 'Medium'), fill=TXT2)
-    d.text((x0, y0 + 84), 'Limite: (a) ferestre S1 valide aproape doar în aug. („irigat” = umezire aug. 2024; iun.–iul. nu se vede);', font=F(12), fill=MUTED)
-    d.text((x0, y0 + 102), '(b) pivoții sunt geometrici (pot fi inactivi în 2024); 942 parcele „nedeterminat” (16,1%) sunt excluse.', font=F(12), fill=MUTED)
 
 def build_loss_gpkg(parcels):
     """Construiește și salvează `data/out/loss_2024.gpkg` (EPSG:3844) cu clasa de pierdere pe fiecare parcelă."""
@@ -266,6 +266,7 @@ def main():
     aoi = aoi_polygon()
     canals = gpd.read_file(OUT / 'canals_osm.gpkg')
     main_canals = canals[canals.waterway == 'canal']
+    pivot_outlines = gpd.read_file(OUT / 'pivots_2024.gpkg').to_crs(CRS).boundary
     base_tif = INTERIM / 's2_august_2024.tif'
     bounds = tuple(np.array(aoi.total_bounds) + np.array([-600, -600, 600, 600]))
     colors = parcel_colors(parcels)
@@ -280,6 +281,7 @@ def main():
     map_px_m = pixel * SS
     out, index = paint(parcels, colors, transform, shape, basemap(base_tif, transform, shape, aoi))
     burn_lines(out, main_canals, transform, CANAL_RGB, alpha=0.75)
+    burn_lines(out, pivot_outlines, transform, PIVOT_RGB, alpha=0.9)
 
     # Pânza 1920×1080
     img = new_canvas()
@@ -314,6 +316,7 @@ def main():
     inset_transform, _ = atlas.fit_frame(inset_bounds, inset_shape[1], inset_shape[0])
     inset_out, _ = paint(parcels, colors, inset_transform, inset_shape, basemap(base_tif, inset_transform, inset_shape, aoi), edges=True)
     burn_lines(inset_out, main_canals, inset_transform, CANAL_RGB, alpha=0.9)
+    burn_lines(inset_out, pivot_outlines, inset_transform, PIVOT_RGB, alpha=0.9)
     img.alpha_composite(to_image(inset_out, (iw, ih)), (ix, iy))
     d.rectangle((ix - 1, iy - 1, ix + iw, iy + ih), outline=TXT2, width=1)
     label(d, (ix + 10, iy + 8), 'Detaliu · mozaicul pierderii pe parcelă', F(14, 'SemiBold'))
@@ -322,16 +325,20 @@ def main():
 
     # Legendă (6 clase fixe + grup incert + fără an comparabil + non-arabil + canale + scară + nord + CRS)
     card(img, (MAP_X, 874, MAP_X + MAP_W, 982))
-    section_label(d, MAP_X + 20, 886, f'Pierderea observată în 2024 (loss_rel × 100 · {fmt_int(len(modeled))} parcele cu referință)')
+    section_label(d, MAP_X + 20, 884, f'Pierderea observată în 2024 (loss_rel × 100 · {fmt_int(len(modeled))} parcele cu referință)')
     col_x = [MAP_X + 20, MAP_X + 165, MAP_X + 275, MAP_X + 385, MAP_X + 495, MAP_X + 605]
     for c_i, (lbl_cls, rgb_cls) in enumerate(zip(atlas.LOSS_CLASS_LABELS, atlas.LOSS_CLASS_COLORS)):
-        legend_swatch(d, col_x[c_i], 912, tuple(int(v) for v in rgb_cls), lbl_cls)
+        legend_swatch(d, col_x[c_i], 906, tuple(int(v) for v in rgb_cls), lbl_cls)
 
-    legend_swatch(d, MAP_X + 20, 946, atlas.INCERT_COLOR, f'Grup incert ({fmt_int(incert_cnt)})')
-    legend_swatch(d, MAP_X + 210, 946, atlas.NO_REF_COLOR, f'Fără an comparabil ({fmt_int(no_ref_cnt)})')
-    legend_swatch(d, MAP_X + 445, 946, atlas.NON_ARABLE_OUTLINE, f'Non-arabil ({fmt_int(non_arable_cnt)})', outline_only=True)
-    d.line((MAP_X + 645, 954, MAP_X + 669, 954), fill=CANAL_RGB, width=3)
-    d.text((MAP_X + 677, 946), 'Canale (OSM)', font=F(14), fill=TXT2)
+    legend_swatch(d, MAP_X + 20, 932, atlas.INCERT_COLOR, f'Grup incert ({fmt_int(incert_cnt)})')
+    legend_swatch(d, MAP_X + 210, 932, atlas.NO_REF_COLOR, f'Fără an comparabil ({fmt_int(no_ref_cnt)})')
+    legend_swatch(d, MAP_X + 445, 932, atlas.NON_ARABLE_OUTLINE, f'Non-arabil ({fmt_int(non_arable_cnt)})', outline_only=True)
+    d.line((MAP_X + 645, 940, MAP_X + 669, 940), fill=CANAL_RGB, width=3)
+    d.text((MAP_X + 677, 932), 'Canale (OSM)', font=F(14), fill=TXT2)
+    ring = Layer(22, 22)
+    ring.circle(11, 11, 8, outline=PIVOT_RGB + (255,), width=1)
+    img.alpha_composite(ring.get(), (MAP_X + 20, 956))
+    d.text((MAP_X + 50, 958), 'Parcele circulare (posibili pivoți)', font=F(14), fill=TXT2)
 
     scale_bar(img, map_px_m, 10, MAP_X + MAP_W - 285, 906)
     north_arrow(img, MAP_X + MAP_W - 44, 892, 22)
@@ -362,24 +369,15 @@ def main():
     d.text((x + 20, 714), 'R² spațial în interiorul grupelor ≈ 0 (primăvară 0,003 · toamnă 0,006)', font=F(15, 'Medium'), fill=TXT2)
     d.text((x + 20, 738), 'Validare pe blocuri spațiale de 5 km (82 blocuri · 11.965 parcele · LightGBM).', font=F(14), fill=MUTED)
 
-    # Panou 3: Irigat vs neirigat (se populează după validarea labels.csv cu acuratețe irigat ≥ 70%)
+    # Panou 3: încercarea de a vedea irigarea din radar (D30)
     card(img, (x, 790, x + PW, 996))
-    irr_metrics_path = OUT / 'irrigation_metrics.json'
-    irr_metrics = json.loads(irr_metrics_path.read_text(encoding='utf-8')) if irr_metrics_path.exists() else {}
-    if irr_metrics.get('panou3_gate_passed'):
-        section_label(d, x + 20, 806, 'Panou 3 · Irigat vs neirigat pe primăvară (Varianta B radar)')
-        draw_irrigation_panel(img, x + 20, 838, PW - 40, irr_metrics)
-    else:
-        section_label(d, x + 20, 806, 'Panou 3 · Irigat vs neirigat (în așteptarea validării labels.csv)')
-        d.rounded_rectangle((x + 20, 834, x + PW - 20, 934), radius=8, fill=BG, outline=LINE, width=1)
-        msg = 'Se completează după validarea labels.csv (poartă: acuratețe clasa „irigat” ≥ 70%)'
-        d.text((x + (PW - F(14).getlength(msg)) / 2, 874), msg, font=F(14), fill=MUTED)
-        d.text((x + 20, 944), 'Limite Q2: (a) ferestre S1 valide aproape doar în aug. („irigat” = umezire aug. 2024; iun.–iul. nu se vede);', font=F(12), fill=MUTED)
-        d.text((x + 20, 964), '(b) pivoții sunt geometrici (C_PP ≥ 0,75, C_MBC ≥ 0,60, A ≥ 5 ha) și pot fi inactivi în 2024.', font=F(12), fill=MUTED)
+    section_label(d, x + 20, 806, 'Panou 3 · Am încercat să vedem irigarea din radar')
+    diagnostic = json.loads((OUT / 's1_events_diagnostic.json').read_text(encoding='utf-8'))
+    draw_radar_panel(img, x + 20, 836, PW - 40, diagnostic['placebo_toamna'])
 
     # Limită metodologică scrisă mic + Subsol (PAS D-B pct. 5 + D27 pct. 2)
     d.text((64, 1012), 'Limite: TPROD măsoară productivitatea vegetației, nu recolta în t/ha (V101 2017–2020, V105 2021–2024). S1 valid aproape doar în aug. 2024; pivoții geometrici pot fi inactivi.', font=F(13), fill=MUTED)
-    draw_footer(img, 'Contains modified Copernicus Sentinel data 2024 · CLMS HR-VPP · ERA5-Land · Fields of The World')
+    draw_footer(img, 'Contains modified Copernicus Sentinel data 2024 · CLMS HR-VPP · ERA5-Land · Fields of The World · SoilGrids · © OpenStreetMap')
 
     target = OUT / 'harta_erou.png'
     img.convert('RGB').save(target, optimize=True)
