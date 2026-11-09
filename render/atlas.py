@@ -36,3 +36,43 @@ def loss_histogram(values, step=0.05):
     edges = np.arange(LOSS_MIN, LOSS_MAX + step / 2, step)
     counts, _ = np.histogram(np.clip(values, edges[0], edges[-1]), bins=edges)
     return edges, counts
+
+
+# ---- Scară fixă în 6 clase procentuale pentru loss_rel × 100 (PAS D-B) ----
+LOSS_CLASS_BINS = (0.0, 10.0, 25.0, 40.0, 55.0)
+LOSS_CLASS_LABELS = ('câștig (< 0%)', '0–10%', '10–25%', '25–40%', '40–55%', '> 55%')
+LOSS_CLASS_COLORS = np.array([
+    (36, 162, 134),   # < 0% (câștig): verde-turcoaz
+    (138, 148, 152),  # 0–10%: gri-neutru cald
+    (204, 162, 84),   # 10–25%: ocru-galben
+    (232, 128, 48),   # 25–40%: portocaliu
+    (228, 78, 38),    # 40–55%: roșu-portocaliu
+    (178, 34, 38),    # > 55%: roșu intens
+], dtype=np.uint8)
+NO_REF_COLOR = (82, 90, 102)
+NON_ARABLE_OUTLINE = (92, 100, 110)
+
+
+def loss_class_index(loss_rel):
+    """Returnează indexul clasei (0..5) pentru vectorul `loss_rel` (fracție, ex. 0.30 = 30%)."""
+    v = np.asarray(loss_rel, dtype=float)
+    # < 0 -> 0; [0, 0.10) -> 1; [0.10, 0.25) -> 2; [0.25, 0.40) -> 3; [0.40, 0.55] -> 4; > 0.55 -> 5
+    idx = np.zeros(v.shape, dtype=np.int32)
+    idx[v >= 0.0] = 1
+    idx[v >= 0.10] = 2
+    idx[v >= 0.25] = 3
+    idx[v >= 0.40] = 4
+    idx[v > 0.55] = 5
+    return idx
+
+
+def loss_class_label(loss_rel):
+    """Returnează eticheta clasei pentru fiecare valoare din `loss_rel`."""
+    idx = loss_class_index(loss_rel)
+    return np.asarray(LOSS_CLASS_LABELS, dtype=object)[idx]
+
+
+def loss_class_rgb(loss_rel):
+    """Returnează culoarea RGB (uint8, N×3) a clasei fixe pentru fiecare valoare din `loss_rel`."""
+    idx = loss_class_index(loss_rel)
+    return LOSS_CLASS_COLORS[idx]

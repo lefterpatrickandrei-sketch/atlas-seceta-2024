@@ -1,4 +1,4 @@
-# GIS Day 2026 — Atlasul vulnerabilității la secetă (sudul Olteniei)
+# GIS Day 2026 — Atlasul secetei din 2024 — sudul Olteniei
 
 Zona: Sadova – Bechet – Dăbuleni – Corabia. Toate livrabilele în EPSG:3844 (Stereo 70).
 Prezentarea: 18 noiembrie 2026, FIFIM, Amfiteatrul II 1.

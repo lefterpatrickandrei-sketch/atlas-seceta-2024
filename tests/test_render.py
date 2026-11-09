@@ -59,3 +59,22 @@ def test_histogram_counts_values_beyond_the_scale_in_the_edge_bins():
     assert counts.sum() == 4
     assert counts[0] == 1 and counts[-1] == 1
     assert len(edges) == len(counts) + 1
+
+
+def test_fixed_loss_classes_map_loss_rel_to_six_discrete_brackets():
+    vals = np.array([-0.05, 0.0, 0.099, 0.10, 0.25, 0.40, 0.55, 0.551])
+    labels = list(atlas.loss_class_label(vals))
+    assert labels == [
+        'câștig (< 0%)',
+        '0–10%',
+        '0–10%',
+        '10–25%',
+        '25–40%',
+        '40–55%',
+        '40–55%',
+        '> 55%',
+    ]
+    colors = atlas.loss_class_rgb(vals)
+    assert colors.shape == (8, 3)
+    assert tuple(colors[0]) == tuple(atlas.LOSS_CLASS_COLORS[0])
+    assert tuple(colors[-1]) == tuple(atlas.LOSS_CLASS_COLORS[5])

@@ -1,4 +1,4 @@
-# GIS Day 2026: Atlasul vulnerabilității la secetă
+# GIS Day 2026: Atlasul secetei din 2024 — sudul Olteniei
 
 Proiect separat de StratumRO. Răspunde în română. Prezentarea e pe 18.11.2026.
 

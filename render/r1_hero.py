@@ -19,8 +19,8 @@ from rasterio.transform import Affine  # noqa: E402
 from rasterio.warp import Resampling, reproject  # noqa: E402
 
 import atlas  # noqa: E402
-from common import (BG, CYAN, GRID, LINE, MUTED, PW, PX0, TXT, TXT2, F, card, draw_footer, draw_header, fmt_dec, fmt_int,  # noqa: E402
-                    new_canvas, north_arrow, ramp_bar, scale_bar, section_label)
+from common import (BG, GRID, LINE, MUTED, PW, PX0, TXT, TXT2, F, card, draw_footer, draw_header, fmt_dec, fmt_int,  # noqa: E402
+                    new_canvas, north_arrow, scale_bar, section_label)
 from gisday_config import AOI_BBOX, CRS, GEE_PROJECT, INTERIM, OUT, RAW  # noqa: E402
 from gisday_lib import overpass_elements  # noqa: E402
 
@@ -30,9 +30,6 @@ INSET = (76, 628, 340, 224)             # x, y, w, h pe pânză: colțul de sud-
 INSET_PX_M = 10.0
 CANAL_RGB = (96, 176, 226)
 TOWNS = ['Sadova', 'Bechet', 'Dăbuleni', 'Corabia']
-FACTOR_NAMES = {'elev': 'Altitudine', 'clay_sg_top': 'Argilă în sol', 'sand_sg_top': 'Nisip în sol', 'soc_sg_top': 'Carbon organic în sol',
-                'slope': 'Pantă', 'dist_canal_m': 'Distanța la canal', 'dist_network_m': 'Distanța la rețeaua de apă',
-                'wind_exposure': 'Expunerea la vânt', 'area_ha': 'Suprafața parcelei', 'soc_lucas_model': 'Carbon organic (LUCAS)'}
 
 
 def aoi_polygon():
@@ -79,42 +76,45 @@ def basemap(tif, transform, shape, aoi):
 
 
 def parcel_colors(parcels):
-    """Tabel RGBA pe parcele (indexul 0 = fără parcelă): culori doar pe parcelele arabile."""
+    """Tabel RGBA pe parcele (indexul 0 = fără parcelă):
+    - arabil cu țintă: cele 6 clase fixe din `atlas.loss_class_rgb` (opac, alpha=255)
+    - arabil fără an comparabil: gri `atlas.NO_REF_COLOR` (opac, alpha=255)
+    - non-arabil: fără umplere (alpha=0); conturul fin se desenează separat în `paint`.
+    """
     rgba = np.zeros((len(parcels) + 1, 4), np.uint8)
     body = rgba[1:]
-    arable = parcels.is_arable.to_numpy()
-    has = arable & parcels.loss_obs.notna().to_numpy()
-    autumn = arable & ~has & parcels.crop_group_2024.eq('toamna').to_numpy()
-    other = arable & ~has & ~autumn
-    body[has, :3] = atlas.loss_rgb(parcels.loss_obs.to_numpy()[has])
-    body[has, 3] = 245
-    body[autumn] = (96, 106, 120, 150)
-    body[other] = (72, 78, 88, 120)
+    arable = parcels.is_arable.to_numpy(dtype=bool)
+    has = arable & parcels.loss_rel.notna().to_numpy()
+    no_ref = arable & ~has
+    body[has, :3] = atlas.loss_class_rgb(parcels.loss_rel.to_numpy()[has])
+    body[has, 3] = 255
+    body[no_ref, :3] = atlas.NO_REF_COLOR
+    body[no_ref, 3] = 255
     return rgba
 
 
 def paint(parcels, colors, transform, shape, base, edges=False):
     index = rasterize(((g, i) for i, g in enumerate(parcels.geometry, 1)), out_shape=shape, transform=transform, fill=0, dtype='int32')
     layer = colors[index].astype(np.float32)
-    alpha = layer[..., 3:] / 255
-    out = base * (1 - alpha) + layer[..., :3] * alpha
+    alpha = layer[..., 3:] / 255.0
+    out = base * (1.0 - alpha) + layer[..., :3] * alpha
+
+    # Contur fin pe parcelele non-arabile (fără umplere)
+    non_arable_ids = np.flatnonzero(~parcels.is_arable.to_numpy(dtype=bool)) + 1
+    non_arable_mask = np.isin(index, non_arable_ids)
+    line_any = (index != np.roll(index, 1, axis=0)) | (index != np.roll(index, 1, axis=1))
+    non_arable_edge = line_any & non_arable_mask
+    out[non_arable_edge] = out[non_arable_edge] * 0.35 + np.array(atlas.NON_ARABLE_OUTLINE, np.float32) * 0.65
+
     if edges:
-        line = (index != np.roll(index, 1, axis=0)) | (index != np.roll(index, 1, axis=1))
-        out[line & (colors[index, 3] > 0)] *= 0.35
+        arable_edge = line_any & (colors[index, 3] > 0)
+        out[arable_edge] *= 0.38
     return out, index
 
 
 def burn_lines(out, ways, transform, color, alpha=0.8):
     mask = rasterize(ways.geometry, out_shape=out.shape[:2], transform=transform, fill=0, default_value=1, all_touched=True, dtype='uint8').astype(bool)
     out[mask] = out[mask] * (1 - alpha) + np.array(color, np.float32) * alpha
-
-
-def burn_outline(out, index, ids, color):
-    """Conturul parcelelor din `ids` (indexi de rasterizare), peste imagine."""
-    from scipy import ndimage
-    mask = np.isin(index, ids)
-    edge = ndimage.binary_dilation(mask, iterations=2) & ~mask
-    out[edge] = color
 
 
 def to_image(array, size):
@@ -125,83 +125,148 @@ def label(draw, xy, text, font, fill=TXT):
     draw.text(xy, text, font=font, fill=fill, stroke_width=3, stroke_fill=BG)
 
 
-def legend_swatch(draw, x, y, color, text, width=26):
-    draw.rounded_rectangle((x, y + 3, x + width, y + 15), radius=3, fill=color)
-    draw.text((x + width + 10, y), text, font=F(15), fill=TXT2)
+def legend_swatch(draw, x, y, color, text, width=22, outline_only=False):
+    if outline_only:
+        draw.rounded_rectangle((x, y + 3, x + width, y + 15), radius=3, fill=BG, outline=color, width=2)
+    else:
+        draw.rounded_rectangle((x, y + 3, x + width, y + 15), radius=3, fill=color)
+    draw.text((x + width + 8, y), text, font=F(14), fill=TXT2)
 
 
-def draw_histogram(img, frame, values, median):
-    x0, y0, x1, y1 = frame
-    edges, counts = atlas.loss_histogram(values)
+def fmt_signed_pct(val_pct, nd=1):
+    s = fmt_dec(abs(val_pct), nd)
+    if val_pct > 0:
+        return f'+{s}%'
+    if val_pct < 0:
+        return f'−{s}%'
+    return f'{s}%'
+
+
+def draw_group_distribution(img, x0, y0, width, modeled):
+    """Panou 1: distribuția pierderii pe grupe (primăvară vs toamnă), mediana, P25–P75 și N pe fiecare grupă."""
     d = ImageDraw.Draw(img)
-    bar_w = (x1 - x0) / len(counts)
-    top = counts.max()
-    colors = atlas.loss_rgb((edges[:-1] + edges[1:]) / 2)
-    for fraction in (0.5, 1.0):
-        y = y1 - (y1 - y0) * fraction
-        d.line((x0, y, x1, y), fill=GRID, width=1)
-    d.line((x0, y1, x1, y1), fill=LINE, width=1)
-    for i, count in enumerate(counts):
-        h = (y1 - y0) * count / top
-        if h >= 1:
-            d.rounded_rectangle((x0 + i * bar_w + 1, y1 - h, x0 + (i + 1) * bar_w - 2, y1), radius=3, fill=tuple(int(v) for v in colors[i]))
-    span = edges[-1] - edges[0]
-    for value in (-0.2, 0.0, 0.2):
-        x = x0 + (value - edges[0]) / span * (x1 - x0)
-        d.line((x, y1, x, y1 + 5), fill=LINE, width=1)
-        text = fmt_dec(value, 1).replace('-', '−')
-        d.text((x - F(14).getlength(text) / 2, y1 + 8), text, font=F(14), fill=TXT2)
-    d.text((x1 - F(14).getlength('0,35'), y1 + 8), '0,35', font=F(14), fill=TXT2)
-    x_median = x0 + (median - edges[0]) / span * (x1 - x0)
-    d.line((x_median, y0 - 4, x_median, y1), fill=TXT, width=2)
-    d.text((x_median + 8, y0 - 8), f'mediana {fmt_dec(median, 2)}', font=F(15, 'Medium'), fill=TXT)
-    d.text((x0, y0 - 8), f'{fmt_int(top)} parcele', font=F(13), fill=MUTED)
+    groups = [
+        ('primavara', 'Culturi de primăvară', 'porumb, floarea-soarelui, soia (NDVI apr. < 0,40)'),
+        ('toamna', 'Culturi de toamnă', 'grâu, orz, rapiță (NDVI apr. ≥ 0,40)'),
+    ]
+    scale_min, scale_max = -60.0, 80.0
+    bar_x0 = x0
+    bar_w = width
+
+    for idx, (g_key, g_title, g_sub) in enumerate(groups):
+        top_y = y0 + idx * 156
+        sub = modeled[modeled.tip_cultura_2024 == g_key]
+        pct = sub.loss_rel.to_numpy() * 100.0
+        n_grp = len(sub)
+        ha_grp = float(sub.area_ha.sum())
+        p25, med, p75 = np.percentile(pct, [25, 50, 75])
+
+        # Titlu grup + N + suprafață
+        d.text((bar_x0, top_y), g_title, font=F(19, 'SemiBold'), fill=TXT)
+        n_txt = f'N = {fmt_int(n_grp)} parcele ({fmt_int(ha_grp)} ha)'
+        d.text((bar_x0 + bar_w - F(14, 'Medium').getlength(n_txt), top_y + 3), n_txt, font=F(14, 'Medium'), fill=TXT2)
+        d.text((bar_x0, top_y + 23), g_sub, font=F(13), fill=MUTED)
+
+        # Cifre cheie: Mediana și P25–P75
+        med_str = f'Mediană: {fmt_signed_pct(med, 1)}'
+        iqr_str = f'P25–P75: {fmt_signed_pct(p25, 1)} … {fmt_signed_pct(p75, 1)}'
+        d.text((bar_x0, top_y + 45), med_str, font=F(20, 'Bold', True), fill=TXT)
+        d.text((bar_x0 + 210, top_y + 48), iqr_str, font=F(15, 'Medium'), fill=TXT2)
+
+        # Bară stivuită pe cele 6 clase fixe
+        cls_idx = atlas.loss_class_index(sub.loss_rel.to_numpy())
+        counts = np.bincount(cls_idx, minlength=6)
+        shares = counts / max(n_grp, 1)
+        by0, by1 = top_y + 76, top_y + 96
+        cur_x = float(bar_x0)
+        for c_i in range(6):
+            seg_w = bar_w * shares[c_i]
+            if seg_w >= 1.0:
+                col = tuple(int(v) for v in atlas.LOSS_CLASS_COLORS[c_i])
+                d.rectangle((cur_x, by0, cur_x + seg_w, by1), fill=col)
+                if seg_w >= 44:
+                    pct_lbl = f'{shares[c_i] * 100:.0f}%'
+                    tw_lbl = F(12, 'SemiBold').getlength(pct_lbl)
+                    d.text((cur_x + (seg_w - tw_lbl) / 2, by0 + 3), pct_lbl, font=F(12, 'SemiBold'), fill=BG if c_i in (1, 2, 3) else TXT)
+            cur_x += seg_w
+        d.rectangle((bar_x0, by0, bar_x0 + bar_w, by1), outline=LINE, width=1)
+
+        # Axă + boxplot P25–Mediană–P75 pe scara [-60%, +80%]
+        ax_y = top_y + 116
+        d.line((bar_x0, ax_y, bar_x0 + bar_w, ax_y), fill=GRID, width=2)
+
+        def to_px(val):
+            v_clip = min(max(val, scale_min), scale_max)
+            return bar_x0 + (v_clip - scale_min) / (scale_max - scale_min) * bar_w
+
+        x_zero = to_px(0.0)
+        d.line((x_zero, ax_y - 8, x_zero, ax_y + 8), fill=MUTED, width=1)
+        x_p25, x_med, x_p75 = to_px(p25), to_px(med), to_px(p75)
+        box_col = (232, 128, 48) if g_key == 'primavara' else (138, 148, 152)
+        d.rounded_rectangle((x_p25, ax_y - 6, x_p75, ax_y + 6), radius=3, fill=box_col, outline=TXT2, width=1)
+        d.line((x_med, ax_y - 9, x_med, ax_y + 9), fill=TXT, width=3)
+
+        if idx == 1:
+            for tick in (-50, -25, 0, 25, 50, 75):
+                tx = to_px(tick)
+                d.line((tx, ax_y + 6, tx, ax_y + 11), fill=LINE, width=1)
+                t_str = f'{tick:+d}%'.replace('-', '−').replace('+0%', '0%')
+                d.text((tx - F(12).getlength(t_str) / 2, ax_y + 13), t_str, font=F(12), fill=MUTED)
 
 
-def draw_factors(img, x0, y0, width, shap_means):
-    d = ImageDraw.Draw(img)
-    name_w, row = 210, 30
-    top = shap_means.iloc[0]
-    for i, (name, value) in enumerate(shap_means.items()):
-        y = y0 + i * row
-        d.text((x0, y), FACTOR_NAMES.get(name, name), font=F(16), fill=TXT2)
-        d.rounded_rectangle((x0 + name_w, y + 4, x0 + name_w + (width - name_w) * value / top, y + 16), radius=3, fill=(120, 142, 170))
+def build_loss_gpkg(parcels):
+    """Construiește și salvează `data/out/loss_2024.gpkg` (EPSG:3844) cu clasa de pierdere pe fiecare parcelă."""
+    out_gdf = parcels[['parcel_id', 'area_ha', 'is_arable', 'tip_cultura_2024', 'n_ref_years', 'ref', 'loss_rel', 'geometry']].copy()
+    out_gdf['loss_pct_lfl'] = (out_gdf['loss_rel'] * 100.0).round(2)
+    clasa = np.full(len(out_gdf), 'non-arabil', dtype=object)
+    arable = out_gdf['is_arable'].to_numpy(dtype=bool)
+    has = arable & out_gdf['loss_rel'].notna().to_numpy()
+    no_ref = arable & ~has
+    clasa[no_ref] = 'fără an comparabil'
+    clasa[has] = atlas.loss_class_label(out_gdf.loc[has, 'loss_rel'].to_numpy())
+    out_gdf['clasa_pierdere'] = clasa
+    out_gdf = gpd.GeoDataFrame(out_gdf, geometry='geometry', crs=CRS)
+    gpkg_path = OUT / 'loss_2024.gpkg'
+    out_gdf.to_file(gpkg_path, layer='loss_2024', driver='GPKG')
+    return out_gdf
 
 
 def main():
     parcels = gpd.read_parquet(OUT / 'parcels.parquet').merge(pd.read_parquet(OUT / 'parcel_target.parquet'), on='parcel_id')
-    irrigation = OUT / 'irrigation_2024.parquet'
-    if irrigation.exists():
-        parcels = parcels.merge(pd.read_parquet(irrigation), on='parcel_id', how='left')
+    parcels = parcels.to_crs(CRS)
+    loss_gdf = build_loss_gpkg(parcels)
+
     aoi = aoi_polygon()
     canals = gpd.read_file(OUT / 'canals_osm.gpkg')
     main_canals = canals[canals.waterway == 'canal']
     base_tif = INTERIM / 's2_august_2024.tif'
     bounds = tuple(np.array(aoi.total_bounds) + np.array([-600, -600, 600, 600]))
     colors = parcel_colors(parcels)
-    modeled = parcels[parcels.is_arable & parcels.loss_obs.notna()]
-    k = atlas.hero_kpis(modeled)
+    modeled = parcels[parcels.is_arable & parcels.loss_rel.notna()].copy()
+    no_ref_cnt = int((parcels.is_arable & parcels.loss_rel.isna()).sum())
+    non_arable_cnt = int((~parcels.is_arable).sum())
 
-    # harta
+    # Harta principală
     shape = (MAP_H * SS, MAP_W * SS)
     transform, pixel = atlas.fit_frame(bounds, shape[1], shape[0])
     map_px_m = pixel * SS
     out, index = paint(parcels, colors, transform, shape, basemap(base_tif, transform, shape, aoi))
     burn_lines(out, main_canals, transform, CANAL_RGB, alpha=0.75)
-    irrigated_ids = None
-    if 'irrigated' in parcels:
-        irrigated_ids = np.flatnonzero(parcels.irrigated.fillna(False).to_numpy(dtype=bool)) + 1
-        burn_outline(out, index, irrigated_ids, CYAN)
 
-    # pânza
+    # Pânza 1920×1080
     img = new_canvas()
-    draw_header(img, 'GIS Day 2026 · Atlasul vulnerabilității la secetă · sudul Olteniei', 'Seceta din 2024, parcelă cu parcelă',
-                'Cât a pierdut vegetația culturilor de primăvară față de anii în care parcela a avut același tip de cultură', badge=False)
+    draw_header(
+        img,
+        'GIS Day 2026 · Atlasul secetei din 2024 — sudul Olteniei',
+        'Seceta din 2024, parcelă cu parcelă',
+        'Pierderea de productivitate (HR-VPP TPROD) față de mediana anilor 2017–2023 cu același tip de cultură',
+        badge=False,
+    )
     img.alpha_composite(to_image(out, (MAP_W, MAP_H)), (MAP_X, MAP_Y))
     d = ImageDraw.Draw(img)
     d.rectangle((MAP_X - 1, MAP_Y - 1, MAP_X + MAP_W, MAP_Y + MAP_H), outline=LINE, width=1)
 
-    # localități
+    # Localități
     final_transform = transform * Affine.scale(SS)
     for town in towns().itertuples():
         col, row = ~final_transform @ (town.geometry.x, town.geometry.y)
@@ -209,7 +274,7 @@ def main():
         d.ellipse((px - 3, py - 3, px + 3, py + 3), fill=TXT, outline=BG, width=1)
         label(d, (px + 8, py - 11), town.name, F(17, 'SemiBold'))
 
-    # detaliu
+    # Fereastră de detaliu (blocul de 5 km cu cele mai multe parcele)
     ix, iy, iw, ih = INSET
     centroids = modeled.geometry.centroid
     blocks = (centroids.x // 5000).astype(int).astype(str) + '_' + (centroids.y // 5000).astype(int).astype(str)
@@ -219,68 +284,61 @@ def main():
     inset_bounds = (center.x - half_w, center.y - half_h, center.x + half_w, center.y + half_h)
     inset_shape = (ih * SS, iw * SS)
     inset_transform, _ = atlas.fit_frame(inset_bounds, inset_shape[1], inset_shape[0])
-    inset_out, inset_index = paint(parcels, colors, inset_transform, inset_shape, basemap(base_tif, inset_transform, inset_shape, aoi), edges=True)
+    inset_out, _ = paint(parcels, colors, inset_transform, inset_shape, basemap(base_tif, inset_transform, inset_shape, aoi), edges=True)
     burn_lines(inset_out, main_canals, inset_transform, CANAL_RGB, alpha=0.9)
-    if irrigated_ids is not None:
-        burn_outline(inset_out, inset_index, irrigated_ids, CYAN)
     img.alpha_composite(to_image(inset_out, (iw, ih)), (ix, iy))
     d.rectangle((ix - 1, iy - 1, ix + iw, iy + ih), outline=TXT2, width=1)
-    label(d, (ix + 10, iy + 8), 'Detaliu · parcelele detectate de AI', F(14, 'SemiBold'))
+    label(d, (ix + 10, iy + 8), 'Detaliu · mozaicul pierderii pe parcelă', F(14, 'SemiBold'))
     col, row = ~final_transform @ (inset_bounds[0], inset_bounds[3])
     d.rectangle((MAP_X + col, MAP_Y + row, MAP_X + col + iw * INSET_PX_M / map_px_m, MAP_Y + row + ih * INSET_PX_M / map_px_m), outline=TXT, width=2)
 
-    # legendă
+    # Legendă (6 clase fixe + fără an comparabil + non-arabil + canale + scară + nord + CRS)
     card(img, (MAP_X, 880, MAP_X + MAP_W, 996))
-    section_label(d, MAP_X + 20, 896, 'Pierdere de NDVI în iulie–august 2024')
-    span = atlas.LOSS_MAX - atlas.LOSS_MIN
-    stops = [((v - atlas.LOSS_MIN) / span, tuple(int(x) for x in atlas.loss_rgb(np.array([v]))[0])) for v in np.linspace(atlas.LOSS_MIN, atlas.LOSS_MAX, 23)]
-    ramp_bar(img, MAP_X + 20, 922, 330, 12, stops,
-             labels=[(0.0, 'câștig'), (-atlas.LOSS_MIN / span, '0'), ((0.15 - atlas.LOSS_MIN) / span, '0,15'), (1.0, '0,35')], label_font=F(14))
-    swatch_x = MAP_X + 390
-    legend_swatch(d, swatch_x, 900, (96, 106, 120), 'Culturi de toamnă, recoltate înainte de vârful secetei')
-    legend_swatch(d, swatch_x, 926, (72, 78, 88), 'Arabil neclasificat sau fără ani de referință')
-    d.line((swatch_x, 963, swatch_x + 26, 963), fill=CANAL_RGB, width=2)
-    d.text((swatch_x + 36, 954), 'Canale (OpenStreetMap)', font=F(15), fill=TXT2)
-    if irrigated_ids is not None:
-        d.rounded_rectangle((swatch_x + 240, 957, swatch_x + 266, 969), radius=3, outline=CYAN, width=2)
-        d.text((swatch_x + 276, 954), 'Parcele irigate detectate', font=F(15), fill=TXT2)
-    scale_bar(img, map_px_m, 10, MAP_X + MAP_W - 290, 912)
+    section_label(d, MAP_X + 20, 892, 'Pierderea observată în 2024 (loss_rel × 100 · 11.971 parcele cu referință)')
+    col_x = [MAP_X + 20, MAP_X + 165, MAP_X + 275, MAP_X + 385, MAP_X + 495, MAP_X + 605]
+    for c_i, (lbl_cls, rgb_cls) in enumerate(zip(atlas.LOSS_CLASS_LABELS, atlas.LOSS_CLASS_COLORS)):
+        legend_swatch(d, col_x[c_i], 918, tuple(int(v) for v in rgb_cls), lbl_cls)
+
+    legend_swatch(d, MAP_X + 20, 952, atlas.NO_REF_COLOR, f'Fără an comparabil ({fmt_int(no_ref_cnt)})')
+    legend_swatch(d, MAP_X + 275, 952, atlas.NON_ARABLE_OUTLINE, f'Non-arabil, contur fin ({fmt_int(non_arable_cnt)})', outline_only=True)
+    d.line((MAP_X + 555, 960, MAP_X + 579, 960), fill=CANAL_RGB, width=3)
+    d.text((MAP_X + 587, 952), 'Canale (OSM)', font=F(14), fill=TXT2)
+
+    scale_bar(img, map_px_m, 10, MAP_X + MAP_W - 285, 912)
     north_arrow(img, MAP_X + MAP_W - 44, 898, 22)
-    d.text((MAP_X + MAP_W - 290, 962), 'Stereo 70 · EPSG:3844', font=F(13), fill=MUTED)
+    d.text((MAP_X + MAP_W - 285, 960), 'EPSG:3844 · Stereo 70', font=F(13, 'Medium'), fill=MUTED)
 
-    # panou: indicatori
+    # ---- Coloana din dreapta: 3 panouri (PAS D-B pct. 2, 3, 4) ----
     x = PX0
-    card(img, (x, 200, x + 296, 322))
-    card(img, (x + 320, 200, x + PW, 322))
-    section_label(d, x + 20, 216, 'Culturi de primăvară')
-    d.text((x + 20, 240), f"{fmt_int(k['ha'])} ha", font=F(44, 'Bold', True), fill=TXT)
-    d.text((x + 20, 294), f"{fmt_int(k['n'])} parcele analizate", font=F(16), fill=TXT2)
-    section_label(d, x + 340, 216, 'Pierdere peste 0,2 NDVI')
-    d.text((x + 340, 240), f"{fmt_int(k['ha_high'])} ha", font=F(44, 'Bold', True), fill=TXT)
-    d.text((x + 340, 294), f"{k['share_high'] * 100:.0f}% din suprafața analizată", font=F(16), fill=TXT2)
 
-    # panou: distribuția
-    card(img, (x, 342, x + PW, 672))
-    section_label(d, x + 20, 358, 'Câte parcele au pierdut cât')
-    draw_histogram(img, (x + 24, 410, x + PW - 24, 630), modeled.loss_obs.to_numpy(), k['median_loss'])
+    # Panou 1: distribuția pierderii pe grupe (primăvară vs toamnă)
+    card(img, (x, 200, x + PW, 578))
+    section_label(d, x + 20, 216, 'Panou 1 · Distribuția pierderii pe grupe de cultură')
+    draw_group_distribution(img, x + 20, 248, PW - 40, modeled)
 
-    # panou: model
-    metrics = json.loads((OUT / 'model_metrics.json').read_text(encoding='utf-8'))
-    shap = pd.read_parquet(OUT / 'vulnerability.parquet')
-    means = shap[[c for c in shap.columns if c.startswith('shap_')]].abs().mean().sort_values(ascending=False).head(5)
-    means.index = means.index.str.replace('shap_', '', regex=False)
-    card(img, (x, 692, x + PW, 996))
-    section_label(d, x + 20, 708, 'Ce a mers împreună cu pierderea')
-    draw_factors(img, x + 20, 736, PW - 40, means)
-    d.line((x + 20, 896, x + PW - 20, 896), fill=LINE, width=1)
-    d.text((x + 20, 908), f"Factorii structurali explică ~{fmt_dec(metrics['r2_spatial'] * 100, 1)}% din variație", font=F(19, 'SemiBold'), fill=TXT)
-    d.text((x + 20, 938), f"R² spațial {fmt_dec(metrics['r2_spatial'], 3)} · validare pe blocuri de 5 km · {fmt_int(metrics['n_parcels'])} parcele", font=F(15), fill=TXT2)
-    d.text((x + 20, 962), 'Asocieri, nu cauze dovedite.', font=F(15), fill=TXT2)
+    # Panou 2: Ce am testat și n-a explicat pierderea
+    card(img, (x, 594, x + PW, 774))
+    section_label(d, x + 20, 610, 'Panou 2 · Ce am testat și n-a explicat pierderea')
+    d.text((x + 20, 640), 'Solul (SoilGrids 250 m), relieful, expunerea la vânt și distanța', font=F(18, 'SemiBold'), fill=TXT)
+    d.text((x + 20, 666), 'la canale nu explică diferențele de pierdere în interiorul grupelor.', font=F(18, 'SemiBold'), fill=TXT)
+    d.line((x + 20, 702, x + PW - 20, 702), fill=LINE, width=1)
+    d.text((x + 20, 714), 'R² spațial în interiorul grupelor ≈ 0 (primăvară 0,003 · toamnă 0,006)', font=F(15, 'Medium'), fill=TXT2)
+    d.text((x + 20, 738), 'Validare pe blocuri spațiale de 5 km (82 blocuri · 11.965 parcele · LightGBM).', font=F(14), fill=MUTED)
 
-    draw_footer(img, 'Contains modified Copernicus Sentinel data 2024 · parcele Fields of The World · JRC EUCROPMAP · SoilGrids · ERA5-Land · © OpenStreetMap contributors')
+    # Panou 3: Rezervat pentru irigat vs neirigat (de completat după Q2, fără cifre provizorii)
+    card(img, (x, 790, x + PW, 996))
+    section_label(d, x + 20, 806, 'Panou 3 · Irigat vs neirigat (rezervat — etapa Q2)')
+    d.rounded_rectangle((x + 20, 836, x + PW - 20, 976), radius=8, fill=BG, outline=LINE, width=1)
+    msg = 'Loc rezervat în layout pentru comparația irigat vs neirigat (după validarea Q2)'
+    d.text((x + (PW - F(14).getlength(msg)) / 2, 898), msg, font=F(14), fill=MUTED)
+
+    # Limită metodologică scrisă mic + Subsol (PAS D-B pct. 5)
+    d.text((64, 1008), 'Limită: TPROD măsoară productivitatea vegetației, nu recolta în t/ha (HR-VPP V101 pentru 2017–2020, V105 pentru 2021–2024).', font=F(14), fill=MUTED)
+    draw_footer(img, 'Contains modified Copernicus Sentinel data 2024 · CLMS HR-VPP · ERA5-Land · Fields of The World')
+
     target = OUT / 'harta_erou.png'
     img.convert('RGB').save(target, optimize=True)
-    print('scris:', target, f"| {k['n']} parcele, {k['ha']:.0f} ha, mediana {k['median_loss']:.3f}, {map_px_m:.1f} m/pixel, bloc detaliu {busiest}")
+    print('scris:', target, 'și', OUT / 'loss_2024.gpkg', f'| {len(modeled)} parcele cu țintă, {no_ref_cnt} fără an comparabil, {non_arable_cnt} non-arabile, {map_px_m:.1f} m/pixel')
 
 
 if __name__ == '__main__':

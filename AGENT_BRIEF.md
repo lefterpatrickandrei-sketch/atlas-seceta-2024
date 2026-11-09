@@ -1,4 +1,4 @@
-# Brief pentru agentul AI — GIS Day 2026, Atlasul vulnerabilității la secetă
+# Brief pentru agentul AI — GIS Day 2026, Atlasul secetei din 2024 — sudul Olteniei
 
 Citește acest fișier integral înainte de orice modificare. Proiectul NU are legătură cu StratumRO.
 
