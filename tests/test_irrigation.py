@@ -61,3 +61,41 @@ def test_s1_spring_irrigation_rule_classifies_irrigated_unirrigated_and_undeterm
     assert len(tr) == 3
     assert list(res['clasa_irigare']) == ['irigat', 'neirigat', 'nedeterminat']
 
+
+def test_read_validation_labels_csv_accepts_comma_and_semicolon(tmp_path):
+    p_comma = tmp_path / 'comma.csv'
+    p_semi = tmp_path / 'semi.csv'
+    p_comma.write_text('id,irigat\n101,1\n102,0\n103,\n', encoding='utf-8')
+    p_semi.write_text('id;irigat\n101;1\n102;0\n103;\n', encoding='utf-8')
+    df_c = gl.read_validation_labels_csv(p_comma)
+    df_s = gl.read_validation_labels_csv(p_semi)
+    assert df_c.equals(df_s)
+    assert list(df_c['parcel_id']) == [101, 102, 103]
+    assert int(df_c.loc[0, 'irigat']) == 1 and int(df_c.loc[1, 'irigat']) == 0 and pd.isna(df_c.loc[2, 'irigat'])
+
+
+def test_olofsson_evaluation_weights_overall_and_producer_accuracy():
+    y_map = ['irigat'] * 40 + ['neirigat'] * 40
+    # 32/40 = 80% pe irigat, 38/40 = 95% pe neirigat
+    y_ref = [1] * 32 + [0] * 8 + [0] * 38 + [1] * 2
+    res = gl.olofsson_evaluation(y_map, y_ref, {'irigat': 600, 'neirigat': 4400})
+    assert res['user_accuracy']['irigat']['est'] == pytest.approx(0.80)
+    assert res['user_accuracy']['neirigat']['est'] == pytest.approx(0.95)
+    # W_irigat = 0.12, W_neirigat = 0.88 -> OA = 0.12*0.80 + 0.88*0.95 = 0.932
+    assert res['overall_accuracy']['est'] == pytest.approx(0.12 * 0.80 + 0.88 * 0.95)
+    # p_11 = 0.12*0.80 = 0.096, p_21 = 0.88*(2/40) = 0.044 -> Recall irigat = 0.096 / (0.096 + 0.044)
+    assert res['producer_accuracy']['irigat']['est'] == pytest.approx(0.096 / 0.140)
+
+
+def test_block_bootstrap_median_diff_returns_medians_and_ci():
+    df = pd.DataFrame({
+        'clasa_irigare': ['irigat'] * 20 + ['neirigat'] * 20,
+        'loss_rel': [0.20] * 20 + [0.35] * 20,
+        'block': [f'b_{i % 5}' for i in range(40)],
+    })
+    out = gl.block_bootstrap_median_diff(df, n_boot=200, seed=1)
+    assert out['irigat']['median'] == pytest.approx(0.20)
+    assert out['neirigat']['median'] == pytest.approx(0.35)
+    assert out['diff_median_pos_minus_neg'] == pytest.approx(-0.15)
+
+

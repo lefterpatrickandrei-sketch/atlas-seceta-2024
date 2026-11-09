@@ -1,6 +1,6 @@
 # Starea proiectului
 
-Verificat pe disc: 09.11.2026 (după `Decizii Q2` pct. 1–8 / `D26`: regula S1 + pivoți fără clasificator optic, excluderea `grup_incert`, refacerea `harta_erou.png` și `tprod_pe_ani.png`, și generarea pachetului de validare cu 80 de parcele în `labels.csv` și `sheet_01..04.png`). Ramura activă: `main` (sincronizată cu `origin/main`).
+Verificat pe disc: 09.11.2026 (după `D27`: aprobarea Variantei B fără `o7_0615_0627`, trecerea limitelor metodologice în `DECIZII.md` și pe hartă, restaurarea marcajului `SECETA 2024` pe `tprod_pe_ani.png`, calculul Panoului 3 pe clasele radar din Varianta B cu bootstrap pe blocuri de 5 km și pregătirea evaluării Olofsson et al. 2014 + poarta de 70% pe `labels.csv`). Ramura activă: `main` (sincronizată cu `origin/main`).
 Produsul (D23): **„Atlasul secetei din 2024 — sudul Olteniei”**.
 „Starea curentă” din `AGENT_BRIEF.md` e mai veche decât acest fișier: a fost scrisă înainte de HR-VPP și de 03b.
 DEPĂȘIT = rezultatul există, dar a fost calculat pe o țintă care între timp s-a schimbat.
@@ -14,7 +14,7 @@ DEPĂȘIT = rezultatul există, dar a fost calculat pe o țintă care între tim
 | S4 Trăsături | GATA | `90d5016`; `data/out/parcel_features.parquet`: 17.466 × 67, cu `tprod_2017`…`tprod_2024` și `tprod_z_2024`. Cele 58 de coloane din `6ef00d6` au rămas identice | Niciunul |
 | S5 Model | REZULTAT NEGATIV (păstrat, D22) | Vezi rândul 04 (`a67fb08`) | Niciunul |
 | 03a Descărcări | GATA | Vezi S1 și S2 | Niciunul |
-| 03b Irigat 2024 | ÎN AȘTEPTAREA VALIDĂRII LUI PATRICK (`D26` pct. 3 și 8) | `notebooks/03b_irrigation.ipynb`, `notebooks/03b_labels_pack.ipynb`, `scripts/label_sheets.py`, `data/out/pivots_2024.gpkg` (**121** pivoți geometrici, **1.810,1 ha**), `data/out/irrigation_2024.parquet` și `irrigation_2024.gpkg` (pe cele **5.836** parcele arabile de primăvară = **22.315,3 ha**: brut fără excluderi **1.172** `irigat` [4.281,7 ha], **3.301** `neirigat` [13.155,7 ha], **1.363** `nedeterminat` [4.877,9 ha]; fără tranziția regională `o7_0615_0627`: **627** `irigat` [2.943,7 ha], **4.267** `neirigat` [16.838,1 ha], **942** `nedeterminat` [2.533,6 ha]), `data/out/s1_transitions_2024.csv`. Pachetul de validare (80 parcele: 40 `irigat` + 40 `neirigat` din 55 blocuri de 5 km): `data/interim/label_sheets/sheet_01.png` … `sheet_04.png` și `data/out/labels.csv` (`id,irigat`) | Confirmarea excluderii tranziției regionale `o7_0615_0627` (pct. 3) și completarea `labels.csv` de către Patrick (pct. 8) |
+| 03b Irigat 2024 | VARIANTA B APROBATĂ (`D27`); ÎN AȘTEPTAREA COMPLETĂRII `labels.csv` | `notebooks/03b_irrigation.ipynb`, `notebooks/03b_labels_pack.ipynb`, `scripts/label_sheets.py`, `data/out/pivots_2024.gpkg` (**121** pivoți geometrici, **1.810,1 ha**), `data/out/irrigation_2024.parquet` și `irrigation_2024.gpkg` (Varianta B oficială pe cele **5.836** parcele arabile de primăvară = **22.315,3 ha**, fără tranziția regională `o7_0615_0627`: **627** `irigat` [10,7%, 2.943,7 ha], **4.267** `neirigat` [73,1%, 16.838,1 ha], **942** `nedeterminat` [16,1%, 2.533,6 ha]). **Panoul 3 (pe clasele RADAR din Varianta B, toate parcelele de primăvară cu țintă, fără `nedeterminat`):** `irigat` ($N=506$): mediană `loss_rel` **+31,95%** (P25–P75: **+6,34% … +49,73%**); `neirigat` ($N=3.645$): mediană **+29,96%** (P25–P75: **+1,08% … +52,15%**); diferență mediane (`irigat − neirigat`): **+1,99 pp** (IC 95% bootstrap pe 81 blocuri de 5 km: **−4,33 … +7,15 pp**). Evaluarea Olofsson et al. (2014) (pe parcele și pe hectare, cu `,` sau `;`) și poarta de 70% pe clasa `irigat` sunt implementate și testate în `gisday_lib.py` și `notebooks/03b_irrigation.ipynb` | Completarea `data/out/labels.csv` de către Patrick, apoi rularea celulei 4 din `03b_irrigation.ipynb` și a `render/r1_hero.py` |
 | 03c Vânt | GATA expunerea; scenariul perdelelor NEÎNCEPUT | `02e6b06`; `data/out/parcel_wind.parquet` (17.466), `wind_rose.parquet` | Scenariul doar după harta-erou (D14) |
 | 03d Carbon LUCAS | AMÂNAT (D24 / `D-03d`) | Amânat conform deciziei `D-03d`; nu se începe | Niciunul |
 | 03e Ținta | GATA (D21 + D26 pct. 6: `grup_incert`) | `data/out/parcel_target.parquet`: din **13.237** parcele arabile, **1.036 (7,83% < 15%)** intră în `grup_incert` (`NDVI apr 2024 ∈ [0,38; 0,45]`: 722 parcele; `crop == 250` furaje/lucernă în EUCROPMAP 2022: 325 parcele; reuniune: 1.036). Rămân **5.836** parcele de primăvară și **6.365** de toamnă. Cu țintă like-for-like ($\ge 2$ ani ref): **11.048** parcele (**4.973** primăvară [18.154 ha] și **6.075** toamnă [39.004 ha]), **1.153** fără an comparabil. Mediana `loss_rel × 100`: **+30,1%** (P25–P75: **+1,4% … +52,1%**) pe primăvară și **−0,2%** (P25–P75: **−33,2% … +24,8%**) pe toamnă | Niciunul |
@@ -24,9 +24,9 @@ DEPĂȘIT = rezultatul există, dar a fost calculat pe o țintă care între tim
 
 În afara listei: 03f, canalele OSM, e gata (`6ef00d6`; `data/out/parcel_canals.parquet`, 17.466 de rânduri).
 
-## Verificări rulate la acest pas (Decizii Q2 pct. 1–8 + Git)
-- **Git:** comite și împinge pe `origin/main` toate modificările pentru `D26` (`Decizii Q2` pct. 1–8).
-- **Teste automate:** `.venv/Scripts/python.exe -m pytest tests -q` → **83 passed in 3.83s**.
+## Verificări rulate la acest pas (D27 + Git)
+- **Git:** comite și împinge pe `origin/main` toate modificările pentru `D27`.
+- **Teste automate:** `.venv/Scripts/python.exe -m pytest tests -q` → **86 passed**.
 - **Q3 (V101 vs V105):** verificat în catalogul WEkEO și pe parcelele stabile din `parcel_features.parquet`; diferența de versiune nu afectează ținta (`rho = 0,9960`).
 
 ## Riscuri și lucruri neverificate

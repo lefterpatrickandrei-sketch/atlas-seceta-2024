@@ -414,6 +414,134 @@ def select_validation_80(df, class_col='clasa_irigare', n_per_class=40, min_area
     return out
 
 
+def read_validation_labels_csv(path):
+    """Citește `labels.csv` cu separator `,` sau `;` (D27 pct. 4) și întoarce un DataFrame cu `parcel_id` și `irigat` (0/1/NA)."""
+    from pathlib import Path
+    import pandas as pd
+    text = Path(path).read_text(encoding='utf-8-sig')
+    first_line = text.splitlines()[0] if text.splitlines() else ''
+    sep = ';' if ';' in first_line and ',' not in first_line else ','
+    df = pd.read_csv(path, sep=sep, encoding='utf-8-sig')
+    df.columns = [c.strip().lower() for c in df.columns]
+    id_col = 'parcel_id' if 'parcel_id' in df.columns else 'id'
+    out = pd.DataFrame({'parcel_id': df[id_col].astype(int)})
+    raw = df['irigat'].astype(str).str.strip().replace({'': pd.NA, 'nan': pd.NA, 'none': pd.NA, '<na>': pd.NA})
+    num = pd.to_numeric(raw, errors='coerce')
+    out['irigat'] = pd.Series(num, dtype='Int8')
+    return out
+
+
+def olofsson_evaluation(y_map, y_ref, weights_dict):
+    """Metrici stratificate Olofsson et al. (2014, Remote Sensing of Environment 148:42–57) pe domeniul evaluat {'irigat', 'neirigat'}.
+
+    - `y_map`: seria/vectorul claselor prezise de regulă ('irigat' sau 'neirigat') pe eșantionul validat;
+    - `y_ref`: seria/vectorul etichetelor de referință (1 = irigat, 0 = neirigat) puse de utilizator;
+    - `weights_dict`: ponderile sau mărimile straturilor în populația evaluată, ex. `{'irigat': 627, 'neirigat': 4267}` (pe parcele)
+      sau `{'irigat': 2943.65, 'neirigat': 16838.12}` (pe hectare). Clasa `nedeterminat` nu intră în domeniul evaluat.
+    Întoarce dicționar cu precizia (user's accuracy) pe fiecare clasă, recall-ul (producer's accuracy) ponderat, acuratețea globală
+    ponderată și intervalele lor de încredere 95% (± 1,96 * SE).
+    """
+    import numpy as np
+    import pandas as pd
+    df = pd.DataFrame({'map_cls': np.asarray(y_map), 'ref': pd.to_numeric(pd.Series(y_ref), errors='coerce')}).dropna(subset=['ref'])
+    df['ref_cls'] = np.where(df['ref'].astype(int) == 1, 'irigat', 'neirigat')
+    classes = ('irigat', 'neirigat')
+    total_w = float(sum(weights_dict[c] for c in classes))
+    W = {c: float(weights_dict[c]) / total_w for c in classes}
+
+    n_i = {}
+    n_ij = {}
+    u_i = {}
+    var_u_i = {}
+    for c in classes:
+        sub = df[df['map_cls'] == c]
+        ni = len(sub)
+        if ni < 2:
+            raise ValueError(f'Prea puține etichete completate în stratul {c}: {ni}')
+        n_i[c] = ni
+        for r in classes:
+            n_ij[(c, r)] = int((sub['ref_cls'] == r).sum())
+        ui = n_ij[(c, c)] / ni
+        u_i[c] = float(ui)
+        var_u_i[c] = float(ui * (1.0 - ui) / (ni - 1))
+
+    # Proporții în matricea de eroare ponderată cu aria/numărul stratului: p_ij = W_i * (n_ij / n_i)
+    p_ij = {(i, j): W[i] * (n_ij[(i, j)] / n_i[i]) for i in classes for j in classes}
+    p_dot_j = {j: sum(p_ij[(i, j)] for i in classes) for j in classes}
+
+    # Acuratețea globală (Overall Accuracy, ec. 1 & 5 din Olofsson et al. 2014)
+    oa = float(sum(p_ij[(c, c)] for c in classes))
+    var_oa = float(sum((W[c] ** 2) * var_u_i[c] for c in classes))
+
+    # Recall / Producer's Accuracy și varianța sa (ec. 3 & 7 din Olofsson et al. 2014)
+    pa = {}
+    var_pa = {}
+    for j in classes:
+        pj = p_dot_j[j]
+        if pj <= 0:
+            pa[j], var_pa[j] = np.nan, np.nan
+            continue
+        p_val = p_ij[(j, j)] / pj
+        pa[j] = float(p_val)
+        term1 = (W[j] ** 2) * ((1.0 - p_val) ** 2) * u_i[j] * (1.0 - u_i[j]) / (n_i[j] - 1)
+        term2 = 0.0
+        for i in classes:
+            if i != j:
+                pij_rel = n_ij[(i, j)] / n_i[i]
+                term2 += (p_val ** 2) * (W[i] ** 2) * pij_rel * (1.0 - pij_rel) / (n_i[i] - 1)
+        var_pa[j] = float((term1 + term2) / (pj ** 2))
+
+    def ci95(val, var):
+        hw = 1.96 * float(np.sqrt(max(var, 0.0)))
+        return [float(np.clip(val - hw, 0.0, 1.0)), float(np.clip(val + hw, 0.0, 1.0))]
+
+    return {
+        'n_evaluated': int(len(df)),
+        'n_per_stratum': n_i,
+        'confusion_counts': {f'{i}_to_{j}': n_ij[(i, j)] for i in classes for j in classes},
+        'weights': W,
+        'user_accuracy': {c: {'est': u_i[c], 'se': float(np.sqrt(var_u_i[c])), 'ci95': ci95(u_i[c], var_u_i[c])} for c in classes},
+        'producer_accuracy': {c: {'est': pa[c], 'se': float(np.sqrt(var_pa[c])), 'ci95': ci95(pa[c], var_pa[c])} for c in classes},
+        'overall_accuracy': {'est': oa, 'se': float(np.sqrt(var_oa)), 'ci95': ci95(oa, var_oa)},
+        'note': 'Clasa „nedeterminat” nu este evaluată; ponderile W_i însumează 1 pe domeniul evaluat {irigat, neirigat}.',
+    }
+
+
+def block_bootstrap_median_diff(df, group_col='clasa_irigare', value_col='loss_rel', block_col='block',
+                                pos_label='irigat', neg_label='neirigat', n_boot=5000, seed=2024):
+    """Comparație irigat vs neirigat pe `value_col` (mediane, P25–P75 și IC 95% bootstrap pe blocuri de 5 km, D27 pct. 5)."""
+    import numpy as np
+    sub = df[df[value_col].notna() & df[group_col].isin([pos_label, neg_label])].copy()
+    v_pos = sub.loc[sub[group_col] == pos_label, value_col].to_numpy(dtype=float)
+    v_neg = sub.loc[sub[group_col] == neg_label, value_col].to_numpy(dtype=float)
+    p25_pos, med_pos, p75_pos = np.percentile(v_pos, [25, 50, 75])
+    p25_neg, med_neg, p75_neg = np.percentile(v_neg, [25, 50, 75])
+    obs_diff = float(med_pos - med_neg)
+
+    blocks = sub[block_col].unique()
+    by_block = {b: (
+        sub.loc[(sub[block_col] == b) & (sub[group_col] == pos_label), value_col].to_numpy(dtype=float),
+        sub.loc[(sub[block_col] == b) & (sub[group_col] == neg_label), value_col].to_numpy(dtype=float),
+    ) for b in blocks}
+
+    rng = np.random.default_rng(seed)
+    diffs = np.empty(n_boot, dtype=float)
+    for k in range(n_boot):
+        chosen = rng.choice(blocks, size=len(blocks), replace=True)
+        pos_arr = np.concatenate([by_block[b][0] for b in chosen if len(by_block[b][0])])
+        neg_arr = np.concatenate([by_block[b][1] for b in chosen if len(by_block[b][1])])
+        diffs[k] = np.median(pos_arr) - np.median(neg_arr)
+    ci_low, ci_high = np.percentile(diffs, [2.5, 97.5])
+    return {
+        pos_label: {'n': int(len(v_pos)), 'p25': float(p25_pos), 'median': float(med_pos), 'p75': float(p75_pos)},
+        neg_label: {'n': int(len(v_neg)), 'p25': float(p25_neg), 'median': float(med_neg), 'p75': float(p75_neg)},
+        'diff_median_pos_minus_neg': obs_diff,
+        'diff_ci95_block_bootstrap': [float(ci_low), float(ci_high)],
+        'n_blocks': int(len(blocks)),
+        'n_boot': int(n_boot),
+    }
+
+
 def block_folds(y, groups, n_splits=5, seed=2024):
     """Împărțiri antrenare/test în care un bloc de 5 km apare doar într-o parte."""
     from sklearn.model_selection import StratifiedGroupKFold

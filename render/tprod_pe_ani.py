@@ -72,11 +72,12 @@ def draw_chart(img, box, stats):
 
     d.text((x0 + 24, y0 + 20), 'TPROD sezonul 1 (unități HR-VPP · mediană și banda P25–P75)', font=F(15, 'SemiBold'), fill=TXT2)
 
-    # Bandă verticală de evidențiere pentru anul analizat 2024 (index 7)
+    # Bandă verticală de evidențiere și marcaj pentru anul 2024 (index 7)
     x_2024 = px_x(len(YEARS) - 1)
-    d.rounded_rectangle((x_2024 - 38, cy0 - 12, x_2024 + 34, cy1 + 8), radius=8, fill=(44, 28, 28), outline=(140, 62, 54), width=1)
-    tag_2024 = 'ANUL 2024'
-    d.text((x_2024 - F(12, 'Bold').getlength(tag_2024) / 2, cy0 - 32), tag_2024, font=F(12, 'Bold'), fill=AMBER)
+    d.rounded_rectangle((x_2024 - 40, cy0 - 12, x_2024 + 36, cy1 + 8), radius=8, fill=(44, 28, 28), outline=(185, 82, 64), width=2)
+    d.rounded_rectangle((x_2024 - 48, cy0 - 38, x_2024 + 44, cy0 - 16), radius=5, fill=(76, 36, 28), outline=AMBER, width=1)
+    tag_2024 = 'SECETA 2024'
+    d.text((x_2024 - 2 - F(12, 'Bold').getlength(tag_2024) / 2, cy0 - 35), tag_2024, font=F(12, 'Bold'), fill=AMBER)
 
     # Desenare benzi P25–P75 și linii mediane (supraeșantionate prin Layer)
     L = Layer(x1 - x0, y1 - y0)

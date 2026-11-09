@@ -218,6 +218,27 @@ def draw_group_distribution(img, x0, y0, width, modeled):
                 d.text((tx - F(12).getlength(t_str) / 2, ax_y + 13), t_str, font=F(12), fill=MUTED)
 
 
+def draw_irrigation_panel(img, x0, y0, width, metrics):
+    """Panou 3: Irigat vs neirigat pe clasele radar din Varianta B (toate parcelele de primăvară cu țintă, fără nedeterminat)."""
+    d = ImageDraw.Draw(img)
+    p3 = metrics.get('panou3_radar_varianta_b', {})
+    ir = p3.get('irigat', {})
+    ne = p3.get('neirigat', {})
+    diff = p3.get('diff_median_pct', 0.0)
+    ci = p3.get('diff_ci95_pct', [0.0, 0.0])
+    n_blk = p3.get('n_blocks', 82)
+
+    d.text((x0, y0), f"Irigat (S1 aug. + pivoți, N = {fmt_int(ir.get('n', 506))}):", font=F(15, 'SemiBold'), fill=(96, 198, 232))
+    d.text((x0 + 295, y0), f"mediană {fmt_signed_pct(ir.get('median_pct', 32.0), 1)} (P25–P75: {fmt_signed_pct(ir.get('p25_pct', 6.3), 1)}…{fmt_signed_pct(ir.get('p75_pct', 49.7), 1)})", font=F(15, 'Bold'), fill=TXT)
+
+    d.text((x0, y0 + 26), f"Neirigat (S1 uscat, N = {fmt_int(ne.get('n', 3645))}):", font=F(15, 'SemiBold'), fill=TXT2)
+    d.text((x0 + 295, y0 + 26), f"mediană {fmt_signed_pct(ne.get('median_pct', 30.0), 1)} (P25–P75: {fmt_signed_pct(ne.get('p25_pct', 1.1), 1)}…{fmt_signed_pct(ne.get('p75_pct', 52.1), 1)})", font=F(15, 'Bold'), fill=TXT)
+
+    d.line((x0, y0 + 54, x0 + width, y0 + 54), fill=LINE, width=1)
+    d.text((x0, y0 + 62), f"Diferență mediane (irigat − neirigat): {fmt_signed_pct(diff, 1)} pp (IC 95% bootstrap {n_blk} blocuri 5 km: {fmt_signed_pct(ci[0], 1)} … {fmt_signed_pct(ci[1], 1)} pp)", font=F(14, 'Medium'), fill=TXT2)
+    d.text((x0, y0 + 86), 'Limite: (a) ferestre S1 valide aproape doar în august („irigat” = umezire aug. 2024; iun.–iul. nu se vede);', font=F(13), fill=MUTED)
+    d.text((x0, y0 + 106), '(b) pivoții sunt geometrici (pot fi inactivi în 2024); 942 parcele „nedeterminat” (16,1%) nu intră în comparație.', font=F(13), fill=MUTED)
+
 def build_loss_gpkg(parcels):
     """Construiește și salvează `data/out/loss_2024.gpkg` (EPSG:3844) cu clasa de pierdere pe fiecare parcelă."""
     out_gdf = parcels[['parcel_id', 'area_ha', 'is_arable', 'tip_cultura_2024', 'n_ref_years', 'ref', 'loss_rel', 'geometry']].copy()
@@ -341,15 +362,23 @@ def main():
     d.text((x + 20, 714), 'R² spațial în interiorul grupelor ≈ 0 (primăvară 0,003 · toamnă 0,006)', font=F(15, 'Medium'), fill=TXT2)
     d.text((x + 20, 738), 'Validare pe blocuri spațiale de 5 km (82 blocuri · 11.965 parcele · LightGBM).', font=F(14), fill=MUTED)
 
-    # Panou 3: Rezervat pentru irigat vs neirigat (de completat după Q2, fără cifre provizorii)
+    # Panou 3: Irigat vs neirigat (se populează după validarea labels.csv cu acuratețe irigat ≥ 70%)
     card(img, (x, 790, x + PW, 996))
-    section_label(d, x + 20, 806, 'Panou 3 · Irigat vs neirigat (rezervat — etapa Q2)')
-    d.rounded_rectangle((x + 20, 836, x + PW - 20, 976), radius=8, fill=BG, outline=LINE, width=1)
-    msg = 'Loc rezervat în layout pentru comparația irigat vs neirigat (după validarea Q2)'
-    d.text((x + (PW - F(14).getlength(msg)) / 2, 898), msg, font=F(14), fill=MUTED)
+    irr_metrics_path = OUT / 'irrigation_metrics.json'
+    irr_metrics = json.loads(irr_metrics_path.read_text(encoding='utf-8')) if irr_metrics_path.exists() else {}
+    if irr_metrics.get('panou3_gate_passed'):
+        section_label(d, x + 20, 806, 'Panou 3 · Irigat vs neirigat pe culturile de primăvară (Varianta B radar)')
+        draw_irrigation_panel(img, x + 20, 838, PW - 40, irr_metrics)
+    else:
+        section_label(d, x + 20, 806, 'Panou 3 · Irigat vs neirigat (rezervat — în așteptarea validării labels.csv ≥ 70%)')
+        d.rounded_rectangle((x + 20, 834, x + PW - 20, 938), radius=8, fill=BG, outline=LINE, width=1)
+        msg = 'Se completează după validarea labels.csv (poartă: acuratețe clasa „irigat” ≥ 70%)'
+        d.text((x + (PW - F(14).getlength(msg)) / 2, 876), msg, font=F(14), fill=MUTED)
+        d.text((x + 20, 946), 'Limite Q2: (a) ferestre S1 valide aproape doar în august („irigat” = umezire în aug. 2024; iun.–iul. nu se vede);', font=F(13), fill=MUTED)
+        d.text((x + 20, 966), '(b) pivoții sunt geometrici (C_PP ≥ 0,75, C_MBC ≥ 0,60, A ≥ 5 ha) și pot fi inactivi în 2024.', font=F(13), fill=MUTED)
 
-    # Limită metodologică scrisă mic + Subsol (PAS D-B pct. 5)
-    d.text((64, 1012), 'Limită: TPROD măsoară productivitatea vegetației, nu recolta în t/ha (HR-VPP V101 pentru 2017–2020, V105 pentru 2021–2024).', font=F(14), fill=MUTED)
+    # Limită metodologică scrisă mic + Subsol (PAS D-B pct. 5 + D27 pct. 2)
+    d.text((64, 1012), 'Limite: TPROD măsoară productivitatea vegetației, nu recolta în t/ha (V101 2017–2020, V105 2021–2024). S1 valid aproape doar în aug. 2024; pivoții geometrici pot fi inactivi.', font=F(13), fill=MUTED)
     draw_footer(img, 'Contains modified Copernicus Sentinel data 2024 · CLMS HR-VPP · ERA5-Land · Fields of The World')
 
     target = OUT / 'harta_erou.png'

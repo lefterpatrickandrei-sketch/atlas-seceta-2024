@@ -1,22 +1,15 @@
 {
-  "method": "s1_vv_rule_plus_geometric_pivots_spring_only",
+  "method": "s1_vv_rule_plus_geometric_pivots_varianta_b_fara_o7_0615_0627",
+  "excluded_transitions": [
+    "o7_0615_0627"
+  ],
+  "limits": [
+    "(a) Ferestrele S1 valide sunt aproape doar în august -> „irigat” = umezire detectată în august 2024; irigarea din iunie–iulie nu se vede.",
+    "(b) Pivoții sunt identificați geometric (C_PP >= 0,75, C_MBC >= 0,60, A >= 5 ha); un pivot poate fi inactiv în 2024."
+  ],
   "n_spring_parcels": 5836,
   "ha_spring_parcels": 22315.34,
-  "varianta_a_raw": {
-    "irigat": {
-      "n": 1172,
-      "ha": 4281.67
-    },
-    "neirigat": {
-      "n": 3301,
-      "ha": 13155.75
-    },
-    "nedeterminat": {
-      "n": 1363,
-      "ha": 4877.92
-    }
-  },
-  "varianta_b_fara_o7_0615_0627": {
+  "varianta_b": {
     "irigat": {
       "n": 627,
       "ha": 2943.67
@@ -29,5 +22,31 @@
       "n": 942,
       "ha": 2533.61
     }
-  }
+  },
+  "panou3_radar_varianta_b": {
+    "irigat": {
+      "n": 506,
+      "p25_pct": 6.34,
+      "median_pct": 31.95,
+      "p75_pct": 49.73
+    },
+    "neirigat": {
+      "n": 3645,
+      "p25_pct": 1.08,
+      "median_pct": 29.96,
+      "p75_pct": 52.15
+    },
+    "diff_median_pct": 1.99,
+    "diff_ci95_pct": [
+      -4.33,
+      7.15
+    ],
+    "n_blocks": 81,
+    "n_boot": 5000,
+    "nedeterminat_excluded": {
+      "n": 942,
+      "ha": 2533.61
+    }
+  },
+  "panou3_gate_passed": false
 }
