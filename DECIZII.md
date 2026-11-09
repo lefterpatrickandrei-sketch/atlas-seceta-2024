@@ -46,4 +46,4 @@ O decizie schimbată nu se șterge: se marchează „înlocuită de Dnn”. Oric
 
 ## De decis (Patrick)
 
-- Aprobarea hărții-erou (`PAS D-B`, `data/out/harta_erou.png` și `data/out/loss_2024.gpkg`) înainte de începerea `PAS Q2` (irigat 2024).
+- Aprobarea pragurilor propuse la **PAS Q2 pct. 1–2** (evenimente de umezire Sentinel-1 VV, ploaie ERA5-Land, circularitate pivoți și factorii clasificatorului), demonstrate pe 5 parcele, înainte de aplicarea pe toată zona și generarea celor 80 de foi de validare (pct. 3).

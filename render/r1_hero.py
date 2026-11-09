@@ -293,20 +293,28 @@ def main():
     d.rectangle((MAP_X + col, MAP_Y + row, MAP_X + col + iw * INSET_PX_M / map_px_m, MAP_Y + row + ih * INSET_PX_M / map_px_m), outline=TXT, width=2)
 
     # Legendă (6 clase fixe + fără an comparabil + non-arabil + canale + scară + nord + CRS)
-    card(img, (MAP_X, 880, MAP_X + MAP_W, 996))
-    section_label(d, MAP_X + 20, 892, 'Pierderea observată în 2024 (loss_rel × 100 · 11.971 parcele cu referință)')
+    card(img, (MAP_X, 874, MAP_X + MAP_W, 982))
+    section_label(d, MAP_X + 20, 886, 'Pierderea observată în 2024 (loss_rel × 100 · 11.971 parcele cu referință)')
     col_x = [MAP_X + 20, MAP_X + 165, MAP_X + 275, MAP_X + 385, MAP_X + 495, MAP_X + 605]
     for c_i, (lbl_cls, rgb_cls) in enumerate(zip(atlas.LOSS_CLASS_LABELS, atlas.LOSS_CLASS_COLORS)):
-        legend_swatch(d, col_x[c_i], 918, tuple(int(v) for v in rgb_cls), lbl_cls)
+        legend_swatch(d, col_x[c_i], 912, tuple(int(v) for v in rgb_cls), lbl_cls)
 
-    legend_swatch(d, MAP_X + 20, 952, atlas.NO_REF_COLOR, f'Fără an comparabil ({fmt_int(no_ref_cnt)})')
-    legend_swatch(d, MAP_X + 275, 952, atlas.NON_ARABLE_OUTLINE, f'Non-arabil, contur fin ({fmt_int(non_arable_cnt)})', outline_only=True)
-    d.line((MAP_X + 555, 960, MAP_X + 579, 960), fill=CANAL_RGB, width=3)
-    d.text((MAP_X + 587, 952), 'Canale (OSM)', font=F(14), fill=TXT2)
+    legend_swatch(d, MAP_X + 20, 946, atlas.NO_REF_COLOR, f'Fără an comparabil ({fmt_int(no_ref_cnt)})')
+    legend_swatch(d, MAP_X + 275, 946, atlas.NON_ARABLE_OUTLINE, f'Non-arabil, contur fin ({fmt_int(non_arable_cnt)})', outline_only=True)
+    d.line((MAP_X + 555, 954, MAP_X + 579, 954), fill=CANAL_RGB, width=3)
+    d.text((MAP_X + 587, 946), 'Canale (OSM)', font=F(14), fill=TXT2)
 
-    scale_bar(img, map_px_m, 10, MAP_X + MAP_W - 285, 912)
-    north_arrow(img, MAP_X + MAP_W - 44, 898, 22)
-    d.text((MAP_X + MAP_W - 285, 960), 'EPSG:3844 · Stereo 70', font=F(13, 'Medium'), fill=MUTED)
+    scale_bar(img, map_px_m, 10, MAP_X + MAP_W - 285, 906)
+    north_arrow(img, MAP_X + MAP_W - 44, 892, 22)
+    d.text((MAP_X + MAP_W - 285, 954), 'EPSG:3844 · Stereo 70', font=F(13, 'Medium'), fill=MUTED)
+
+    # Frază explicativă imediat sub legendă
+    d.text(
+        (MAP_X, 988),
+        'Fiecare parcelă e comparată cu anii 2017–2023 în care a avut același tip de cultură; „câștig” = 2024 peste mediana acelor ani.',
+        font=F(15, 'Medium'),
+        fill=TXT2,
+    )
 
     # ---- Coloana din dreapta: 3 panouri (PAS D-B pct. 2, 3, 4) ----
     x = PX0
@@ -333,7 +341,7 @@ def main():
     d.text((x + (PW - F(14).getlength(msg)) / 2, 898), msg, font=F(14), fill=MUTED)
 
     # Limită metodologică scrisă mic + Subsol (PAS D-B pct. 5)
-    d.text((64, 1008), 'Limită: TPROD măsoară productivitatea vegetației, nu recolta în t/ha (HR-VPP V101 pentru 2017–2020, V105 pentru 2021–2024).', font=F(14), fill=MUTED)
+    d.text((64, 1012), 'Limită: TPROD măsoară productivitatea vegetației, nu recolta în t/ha (HR-VPP V101 pentru 2017–2020, V105 pentru 2021–2024).', font=F(14), fill=MUTED)
     draw_footer(img, 'Contains modified Copernicus Sentinel data 2024 · CLMS HR-VPP · ERA5-Land · Fields of The World')
 
     target = OUT / 'harta_erou.png'
