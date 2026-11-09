@@ -76,7 +76,7 @@ def draw_chart(img, box, stats):
     x_2024 = px_x(len(YEARS) - 1)
     d.rounded_rectangle((x_2024 - 40, cy0 - 12, x_2024 + 36, cy1 + 8), radius=8, fill=(44, 28, 28), outline=(185, 82, 64), width=2)
     d.rounded_rectangle((x_2024 - 48, cy0 - 38, x_2024 + 44, cy0 - 16), radius=5, fill=(76, 36, 28), outline=AMBER, width=1)
-    tag_2024 = 'SECETA 2024'
+    tag_2024 = 'SECETĂ 2024'
     d.text((x_2024 - 2 - F(12, 'Bold').getlength(tag_2024) / 2, cy0 - 35), tag_2024, font=F(12, 'Bold'), fill=AMBER)
 
     # Desenare benzi P25–P75 și linii mediane (supraeșantionate prin Layer)
@@ -196,7 +196,7 @@ def main():
         d.text((rx + 334, ry + 4), au_txt, font=f_row, fill=TXT)
 
     d.text((64, 1008), 'Limită: TPROD măsoară productivitatea vegetației, nu recolta în t/ha. Anii 2017–2020 sunt procesați în HR-VPP V101, iar 2021–2024 în V105.', font=F(14), fill=MUTED)
-    draw_footer(img, 'Contains modified Copernicus Sentinel data 2017–2024 · CLMS HR-VPP · Fields of The World · EPSG:3844')
+    draw_footer(img, 'Contains modified Copernicus Sentinel data 2017–2024 · CLMS HR-VPP · Fields of The World · EPSG:3844 · Secetă 2024: AGERPRES, Retrospectiva 2024 (22.12.2024)')
 
     out_path = OUT / 'tprod_pe_ani.png'
     img.convert('RGB').save(out_path, optimize=True)
