@@ -278,10 +278,140 @@ def overpass_elements(query, mirrors=OVERPASS_MIRRORS, tries=3, wait_s=30, post=
     raise RuntimeError(f'Overpass indisponibil (ultimul cod HTTP: {code})')
 
 
-# ---- Clasificatorul de irigare ---------------------------------------------------------------------------------------
+# ---- Clasificatorul de irigare și regula Sentinel-1 + pivoți (D26) ---------------------------------------------------
 MIN_LABELS_PER_CLASS = 10
 LGB_CLASSIFIER = dict(n_estimators=300, learning_rate=0.05, num_leaves=15, min_child_samples=5, subsample=0.8,
                       subsample_freq=1, colsample_bytree=0.8, verbose=-1)
+
+
+def geometric_pivots(geometries, min_cpp=0.75, min_cmbc=0.60, min_area_ha=5.0):
+    """Pivoți circulari doar din geometrie (D26 pct. 4): C_PP >= 0,75, C_MBC >= 0,60, A >= 5 ha (fără condiție NDVI)."""
+    import numpy as np
+    import pandas as pd
+    import shapely
+    geoms = np.asarray(geometries)
+    area_m2 = shapely.area(geoms)
+    perim_m = shapely.length(geoms)
+    c_pp = 4.0 * np.pi * area_m2 / np.maximum(perim_m ** 2, 1e-9)
+    mbc_r = shapely.minimum_bounding_radius(geoms)
+    c_mbc = area_m2 / np.maximum(np.pi * (mbc_r ** 2), 1e-9)
+    area_ha = area_m2 / 10000.0
+    is_piv = (c_pp >= min_cpp) & (c_mbc >= min_cmbc) & (area_ha >= min_area_ha)
+    idx = getattr(geometries, 'index', None)
+    return pd.DataFrame({'area_ha': area_ha, 'c_pp': c_pp, 'c_mbc': c_mbc, 'is_pivot': is_piv}, index=idx)
+
+
+def s1_spring_irrigation_rule(df, exclude_transitions=(), min_dvv_event=1.5, max_dvv_dry=0.8,
+                              min_dry_transitions=3, max_rain_5d=2.0, max_rain_12d=5.0):
+    """Regula radar Sentinel-1 + pivoți pe culturile de primăvară (D26 pct. 1–5).
+
+    Primește un DataFrame `df` (parcele de primăvară) cu coloanele `vv_o{orbit}_{YYYYMMDD}`, `rain_{YYYYMMDD}` și `is_pivot`.
+    Întoarce `(transitions_df, result_df)`:
+    - `transitions_df`: statisticile pe fiecare trecere consecutivă de 12 zile (aceeași orbită) din iunie–august 2024;
+    - `result_df`: pe parcelă (`n_dry_obs`, `n_events_s1`, `max_dvv_dry`, `is_pivot`, `clasa_irigare` în {'irigat', 'neirigat', 'nedeterminat'}).
+    """
+    import numpy as np
+    import pandas as pd
+    excl = set(exclude_transitions or ())
+    s1_cols = [c for c in df.columns if c.startswith('vv_o')]
+    acq = []
+    for c in s1_cols:
+        parts = c.split('_')
+        acq.append((int(parts[1][1:]), pd.to_datetime(parts[2], format='%Y%m%d'), c))
+    acq_df = pd.DataFrame(acq, columns=['orbit', 'date', 'col']).sort_values(['orbit', 'date']).reset_index(drop=True)
+
+    tr_rows = []
+    dvv_dict, dry_dict = {}, {}
+    for orb, g in acq_df.groupby('orbit'):
+        g = g.sort_values('date').reset_index(drop=True)
+        for i in range(1, len(g)):
+            t0, t1 = g.loc[i - 1, 'date'], g.loc[i, 'date']
+            c0, c1 = g.loc[i - 1, 'col'], g.loc[i, 'col']
+            dt_days = int((t1 - t0).days)
+            if dt_days != 12 or t1 < pd.Timestamp('2024-06-01') or t1 > pd.Timestamp('2024-08-31'):
+                continue
+            key = f"o{orb}_{t0.strftime('%m%d')}_{t1.strftime('%m%d')}"
+            d12 = [f"rain_{d.strftime('%Y%m%d')}" for d in pd.date_range(t0 + pd.Timedelta(days=1), t1, freq='D')]
+            d5 = [f"rain_{d.strftime('%Y%m%d')}" for d in pd.date_range(t1 - pd.Timedelta(days=4), t1, freq='D')]
+            r12 = df[d12].sum(axis=1)
+            r5 = df[d5].sum(axis=1)
+            dvv = df[c1] - df[c0]
+            obs = dvv.notna()
+            dry = obs & (r5 < max_rain_5d) & (r12 < max_rain_12d)
+            evt_dry = dry & (dvv >= min_dvv_event)
+            evt_raw = obs & (dvv >= min_dvv_event)
+            n_obs, n_dry = int(obs.sum()), int(dry.sum())
+            tr_rows.append({
+                'key': key,
+                'orbit': int(orb),
+                't0': t0.strftime('%Y-%m-%d'),
+                't1': t1.strftime('%Y-%m-%d'),
+                'dt_days': dt_days,
+                'n_obs': n_obs,
+                'n_dry': n_dry,
+                'pct_dry_obs': float(100.0 * n_dry / max(n_obs, 1)) if n_obs else 0.0,
+                'rain5_med': float(r5[obs].median()) if n_obs else np.nan,
+                'rain5_p90': float(r5[obs].quantile(0.90)) if n_obs else np.nan,
+                'rain12_med': float(r12[obs].median()) if n_obs else np.nan,
+                'rain12_p90': float(r12[obs].quantile(0.90)) if n_obs else np.nan,
+                'dvv_med_dry': float(dvv[dry].median()) if n_dry else np.nan,
+                'dvv_p90_dry': float(dvv[dry].quantile(0.90)) if n_dry else np.nan,
+                'n_evt_raw': int(evt_raw.sum()),
+                'pct_evt_raw': float(100.0 * evt_raw.sum() / max(n_obs, 1)) if n_obs else 0.0,
+                'n_evt_dry': int(evt_dry.sum()),
+                'pct_evt_dry': float(100.0 * evt_dry.sum() / max(n_dry, 1)) if n_dry else 0.0,
+                'pct_evt_obs': float(100.0 * evt_dry.sum() / max(n_obs, 1)) if n_obs else 0.0,
+                'excluded': key in excl,
+            })
+            if key not in excl:
+                dvv_dict[key] = dvv
+                dry_dict[key] = dry
+
+    transitions_df = pd.DataFrame(tr_rows)
+    if dvv_dict:
+        dvv_mat = pd.DataFrame(dvv_dict, index=df.index)
+        dry_mat = pd.DataFrame(dry_dict, index=df.index)
+        dvv_dry = dvv_mat.where(dry_mat)
+        n_dry_obs = dry_mat.sum(axis=1).astype(int)
+        n_events = (dvv_dry >= min_dvv_event).sum(axis=1).astype(int)
+        max_dvv = dvv_dry.max(axis=1)
+    else:
+        n_dry_obs = pd.Series(0, index=df.index, dtype=int)
+        n_events = pd.Series(0, index=df.index, dtype=int)
+        max_dvv = pd.Series(np.nan, index=df.index, dtype=float)
+
+    piv = df['is_pivot'].astype(bool)
+    is_irig = (n_events >= 1) | piv
+    is_neirig = (~is_irig) & (n_events == 0) & (n_dry_obs >= min_dry_transitions) & (max_dvv < max_dvv_dry)
+    clasa = np.where(is_irig, 'irigat', np.where(is_neirig, 'neirigat', 'nedeterminat'))
+    result_df = pd.DataFrame({
+        'n_dry_obs': n_dry_obs,
+        'n_events_s1': n_events,
+        'max_dvv_dry': max_dvv,
+        'is_pivot': piv,
+        'clasa_irigare': clasa,
+    }, index=df.index)
+    return transitions_df, result_df
+
+
+def select_validation_80(df, class_col='clasa_irigare', n_per_class=40, min_area_ha=1.0, max_per_block=1, seed=2024):
+    """Pachetul de validare Q2 (D26 pct. 8): 40 `irigat` + 40 `neirigat` pe primăvară, răspândite pe blocuri de 5 km."""
+    import pandas as pd
+    pool = df[df.area_ha.ge(min_area_ha) & df[class_col].isin(['irigat', 'neirigat'])].copy()
+    pool = pool.sample(frac=1.0, random_state=seed)
+    picked = []
+    for cls_name in ('irigat', 'neirigat'):
+        sub = pool[pool[class_col] == cls_name]
+        cap = max_per_block
+        while len(sub[sub.groupby('block').cumcount() < cap]) < n_per_class and cap < len(sub):
+            cap += 1
+        sel = sub[sub.groupby('block').cumcount() < cap].head(n_per_class)
+        if len(sel) < n_per_class:
+            raise ValueError(f'Prea puține parcele în clasa {cls_name}: {len(sel)} < {n_per_class}')
+        picked.append(sel)
+    out = pd.concat(picked).sort_values('parcel_id')[['parcel_id', class_col]].rename(columns={class_col: 'clasa_regula'}).reset_index(drop=True)
+    out['irigat'] = pd.Series([pd.NA] * len(out), dtype='Int8')
+    return out
 
 
 def block_folds(y, groups, n_splits=5, seed=2024):

@@ -72,10 +72,10 @@ def draw_chart(img, box, stats):
 
     d.text((x0 + 24, y0 + 20), 'TPROD sezonul 1 (unități HR-VPP · mediană și banda P25–P75)', font=F(15, 'SemiBold'), fill=TXT2)
 
-    # Bandă verticală de evidențiere pentru anul secetei 2024 (index 7)
+    # Bandă verticală de evidențiere pentru anul analizat 2024 (index 7)
     x_2024 = px_x(len(YEARS) - 1)
     d.rounded_rectangle((x_2024 - 38, cy0 - 12, x_2024 + 34, cy1 + 8), radius=8, fill=(44, 28, 28), outline=(140, 62, 54), width=1)
-    tag_2024 = 'SECETA 2024'
+    tag_2024 = 'ANUL 2024'
     d.text((x_2024 - F(12, 'Bold').getlength(tag_2024) / 2, cy0 - 32), tag_2024, font=F(12, 'Bold'), fill=AMBER)
 
     # Desenare benzi P25–P75 și linii mediane (supraeșantionate prin Layer)
@@ -109,22 +109,27 @@ def draw_chart(img, box, stats):
         v_tag = 'V101' if y <= 2020 else 'V105'
         d.text((xx - F(11).getlength(v_tag) / 2, cy1 + 36), v_tag, font=F(11), fill=MUTED)
 
-    # Valori numerice ale medianei pe grafic
-    for grp, col, dy_off in (('toamna', AUTUMN_RGB, -26), ('primavara', SPRING_RGB, 12)):
-        for i, r in enumerate(stats[grp]):
+    # Valori numerice ale medianei pe grafic (seria mai sus primește eticheta deasupra, cea mai jos dedesubt)
+    for i in range(len(YEARS)):
+        sp_v = stats['primavara'][i]['p50']
+        au_v = stats['toamna'][i]['p50']
+        sp_dy = -24 if sp_v > au_v else 12
+        au_dy = -24 if au_v >= sp_v else 12
+        for grp, col, val, dy_off in (('toamna', AUTUMN_RGB, au_v, au_dy), ('primavara', SPRING_RGB, sp_v, sp_dy)):
             xx = px_x(i)
-            yy = px_y(r['p50'])
-            val_txt = fmt_int(r['p50'])
-            f_val = F(15, 'Bold') if r['year'] in (2020, 2022, 2024) else F(14, 'SemiBold')
-            d.text((xx - f_val.getlength(val_txt) / 2, yy + dy_off), val_txt, font=f_val, fill=TXT if r['year'] == 2024 else col)
+            yy = px_y(val)
+            val_txt = fmt_int(val)
+            yr = YEARS[i]
+            f_val = F(15, 'Bold') if yr in (2020, 2022, 2024) else F(14, 'SemiBold')
+            d.text((xx - f_val.getlength(val_txt) / 2, yy + dy_off), val_txt, font=f_val, fill=TXT if yr == 2024 else col)
 
-    # Legendă în colțul dreapta-sus al graficului
-    lx = cx1 - 520
-    ly = y0 + 18
-    d.rounded_rectangle((lx, ly + 4, lx + 24, ly + 16), radius=3, fill=AUTUMN_RGB)
-    d.text((lx + 32, ly), 'Toamnă (NDVI apr. ≥ 0,40) · mediană și P25–P75', font=F(14, 'Medium'), fill=TXT)
-    d.rounded_rectangle((lx + 310, ly + 4, lx + 334, ly + 16), radius=3, fill=SPRING_RGB)
-    d.text((lx + 342, ly), 'Primăvară (NDVI apr. < 0,40)', font=F(14, 'Medium'), fill=TXT)
+    # Legendă în partea de sus a graficului (fără suprapunere cu eticheta 2024)
+    lx = cx1 - 580
+    ly = y0 + 19
+    d.rounded_rectangle((lx, ly + 4, lx + 22, ly + 15), radius=3, fill=AUTUMN_RGB)
+    d.text((lx + 30, ly), 'Toamnă (mediană și P25–P75)', font=F(14, 'Medium'), fill=TXT)
+    d.rounded_rectangle((lx + 258, ly + 4, lx + 280, ly + 15), radius=3, fill=SPRING_RGB)
+    d.text((lx + 288, ly), 'Primăvară (mediană și P25–P75)', font=F(14, 'Medium'), fill=TXT)
 
 
 def main():
@@ -149,16 +154,22 @@ def main():
     card(img, (rx, 200, rx + rw, 470))
     section_label(d, rx + 20, 216, 'Anii cei mai slabi din perioada de bază (2017–2023) vs 2024')
 
+    sp_base = sorted(stats['primavara'][:-1], key=lambda r: r['p50'])
+    sp_w1, sp_w2 = sp_base[0], sp_base[1]
+    sp_24 = stats['primavara'][-1]
     d.text((rx + 20, 248), 'Culturi de primăvară (porumb, floarea-soarelui, soia):', font=F(16, 'SemiBold'), fill=SPRING_RGB)
-    d.text((rx + 20, 274), '• Cei mai slabi ani din bază: 2020 (mediană 645, P25–P75: 477–857)', font=F(15, 'Medium'), fill=TXT)
-    d.text((rx + 32, 298), 'și 2022 (mediană 751, P25–P75: 525–1.026).', font=F(15, 'Medium'), fill=TXT2)
-    d.text((rx + 20, 322), '• 2024 coboară sub toți anii din bază: mediană 530 (P25–P75: 350–800).', font=F(15, 'Bold'), fill=AMBER)
+    d.text((rx + 20, 274), f"• Cel mai slab an din bază: {sp_w1['year']} (mediană {fmt_int(sp_w1['p50'])}, P25–P75: {fmt_int(sp_w1['p25'])}–{fmt_int(sp_w1['p75'])})", font=F(15, 'Medium'), fill=TXT)
+    d.text((rx + 32, 298), f"urmat de {sp_w2['year']} (mediană {fmt_int(sp_w2['p50'])}, P25–P75: {fmt_int(sp_w2['p25'])}–{fmt_int(sp_w2['p75'])}).", font=F(15, 'Medium'), fill=TXT2)
+    d.text((rx + 20, 322), f"• Anul 2024 (sub toți anii din bază): mediană {fmt_int(sp_24['p50'])} (P25–P75: {fmt_int(sp_24['p25'])}–{fmt_int(sp_24['p75'])}).", font=F(15, 'Bold'), fill=AMBER)
 
+    au_base = sorted(stats['toamna'][:-1], key=lambda r: r['p50'])
+    au_w1, au_w2, au_w3 = au_base[0], au_base[1], au_base[2]
+    au_24 = stats['toamna'][-1]
     d.line((rx + 20, 354, rx + rw - 20, 354), fill=LINE, width=1)
     d.text((rx + 20, 366), 'Culturi de toamnă (grâu, orz, rapiță):', font=F(16, 'SemiBold'), fill=AUTUMN_RGB)
-    d.text((rx + 20, 392), '• Cei mai slabi ani din bază: 2022 (mediană 781, P25–P75: 601–1.052)', font=F(15, 'Medium'), fill=TXT)
-    d.text((rx + 32, 416), 'și 2020 (mediană 820, P25–P75: 632–1.063), urmați de 2018 (835).', font=F(15, 'Medium'), fill=TXT2)
-    d.text((rx + 20, 440), '• În 2024 toamna rezistă: mediană 904 (P25–P75: 655–1.248).', font=F(15, 'SemiBold'), fill=TXT)
+    d.text((rx + 20, 392), f"• Cel mai slab an din bază: {au_w1['year']} (mediană {fmt_int(au_w1['p50'])}, P25–P75: {fmt_int(au_w1['p25'])}–{fmt_int(au_w1['p75'])})", font=F(15, 'Medium'), fill=TXT)
+    d.text((rx + 32, 416), f"urmat de {au_w2['year']} (mediană {fmt_int(au_w2['p50'])}, P25–P75: {fmt_int(au_w2['p25'])}–{fmt_int(au_w2['p75'])}) și {au_w3['year']} ({fmt_int(au_w3['p50'])}).", font=F(15, 'Medium'), fill=TXT2)
+    d.text((rx + 20, 440), f"• Anul 2024 pe culturile de toamnă: mediană {fmt_int(au_24['p50'])} (P25–P75: {fmt_int(au_24['p25'])}–{fmt_int(au_24['p75'])}).", font=F(15, 'SemiBold'), fill=TXT)
 
     # Tabel anual 2017–2024
     card(img, (rx, 488, rx + rw, 988))
@@ -193,3 +204,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

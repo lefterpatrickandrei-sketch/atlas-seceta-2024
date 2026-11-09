@@ -78,16 +78,20 @@ def basemap(tif, transform, shape, aoi):
 def parcel_colors(parcels):
     """Tabel RGBA pe parcele (indexul 0 = fără parcelă):
     - arabil cu țintă: cele 6 clase fixe din `atlas.loss_class_rgb` (opac, alpha=255)
-    - arabil fără an comparabil: gri `atlas.NO_REF_COLOR` (opac, alpha=255)
+    - arabil grup incert: gri deschis `atlas.INCERT_COLOR` (opac, alpha=255)
+    - arabil fără an comparabil: gri închis `atlas.NO_REF_COLOR` (opac, alpha=255)
     - non-arabil: fără umplere (alpha=0); conturul fin se desenează separat în `paint`.
     """
     rgba = np.zeros((len(parcels) + 1, 4), np.uint8)
     body = rgba[1:]
     arable = parcels.is_arable.to_numpy(dtype=bool)
-    has = arable & parcels.loss_rel.notna().to_numpy()
-    no_ref = arable & ~has
+    incert = arable & parcels.tip_cultura_2024.eq('grup_incert').to_numpy()
+    has = arable & ~incert & parcels.loss_rel.notna().to_numpy()
+    no_ref = arable & ~incert & ~has
     body[has, :3] = atlas.loss_class_rgb(parcels.loss_rel.to_numpy()[has])
     body[has, 3] = 255
+    body[incert, :3] = atlas.INCERT_COLOR
+    body[incert, 3] = 255
     body[no_ref, :3] = atlas.NO_REF_COLOR
     body[no_ref, 3] = 255
     return rgba
@@ -146,8 +150,8 @@ def draw_group_distribution(img, x0, y0, width, modeled):
     """Panou 1: distribuția pierderii pe grupe (primăvară vs toamnă), mediana, P25–P75 și N pe fiecare grupă."""
     d = ImageDraw.Draw(img)
     groups = [
-        ('primavara', 'Culturi de primăvară', 'porumb, floarea-soarelui, soia (NDVI apr. < 0,40)'),
-        ('toamna', 'Culturi de toamnă', 'grâu, orz, rapiță (NDVI apr. ≥ 0,40)'),
+        ('primavara', 'Culturi de primăvară', 'porumb, floarea-soarelui, soia (NDVI apr. < 0,38, fără furaje)'),
+        ('toamna', 'Culturi de toamnă', 'grâu, orz, rapiță (NDVI apr. > 0,45, fără furaje)'),
     ]
     scale_min, scale_max = -60.0, 80.0
     bar_x0 = x0
@@ -220,8 +224,10 @@ def build_loss_gpkg(parcels):
     out_gdf['loss_pct_lfl'] = (out_gdf['loss_rel'] * 100.0).round(2)
     clasa = np.full(len(out_gdf), 'non-arabil', dtype=object)
     arable = out_gdf['is_arable'].to_numpy(dtype=bool)
-    has = arable & out_gdf['loss_rel'].notna().to_numpy()
-    no_ref = arable & ~has
+    incert = arable & out_gdf['tip_cultura_2024'].eq('grup_incert').to_numpy()
+    has = arable & ~incert & out_gdf['loss_rel'].notna().to_numpy()
+    no_ref = arable & ~incert & ~has
+    clasa[incert] = 'grup incert'
     clasa[no_ref] = 'fără an comparabil'
     clasa[has] = atlas.loss_class_label(out_gdf.loc[has, 'loss_rel'].to_numpy())
     out_gdf['clasa_pierdere'] = clasa
@@ -234,7 +240,7 @@ def build_loss_gpkg(parcels):
 def main():
     parcels = gpd.read_parquet(OUT / 'parcels.parquet').merge(pd.read_parquet(OUT / 'parcel_target.parquet'), on='parcel_id')
     parcels = parcels.to_crs(CRS)
-    loss_gdf = build_loss_gpkg(parcels)
+    build_loss_gpkg(parcels)
 
     aoi = aoi_polygon()
     canals = gpd.read_file(OUT / 'canals_osm.gpkg')
@@ -243,7 +249,8 @@ def main():
     bounds = tuple(np.array(aoi.total_bounds) + np.array([-600, -600, 600, 600]))
     colors = parcel_colors(parcels)
     modeled = parcels[parcels.is_arable & parcels.loss_rel.notna()].copy()
-    no_ref_cnt = int((parcels.is_arable & parcels.loss_rel.isna()).sum())
+    incert_cnt = int((parcels.is_arable & parcels.tip_cultura_2024.eq('grup_incert')).sum())
+    no_ref_cnt = int((parcels.is_arable & ~parcels.tip_cultura_2024.eq('grup_incert') & parcels.loss_rel.isna()).sum())
     non_arable_cnt = int((~parcels.is_arable).sum())
 
     # Harta principală
@@ -292,17 +299,18 @@ def main():
     col, row = ~final_transform @ (inset_bounds[0], inset_bounds[3])
     d.rectangle((MAP_X + col, MAP_Y + row, MAP_X + col + iw * INSET_PX_M / map_px_m, MAP_Y + row + ih * INSET_PX_M / map_px_m), outline=TXT, width=2)
 
-    # Legendă (6 clase fixe + fără an comparabil + non-arabil + canale + scară + nord + CRS)
+    # Legendă (6 clase fixe + grup incert + fără an comparabil + non-arabil + canale + scară + nord + CRS)
     card(img, (MAP_X, 874, MAP_X + MAP_W, 982))
-    section_label(d, MAP_X + 20, 886, 'Pierderea observată în 2024 (loss_rel × 100 · 11.971 parcele cu referință)')
+    section_label(d, MAP_X + 20, 886, f'Pierderea observată în 2024 (loss_rel × 100 · {fmt_int(len(modeled))} parcele cu referință)')
     col_x = [MAP_X + 20, MAP_X + 165, MAP_X + 275, MAP_X + 385, MAP_X + 495, MAP_X + 605]
     for c_i, (lbl_cls, rgb_cls) in enumerate(zip(atlas.LOSS_CLASS_LABELS, atlas.LOSS_CLASS_COLORS)):
         legend_swatch(d, col_x[c_i], 912, tuple(int(v) for v in rgb_cls), lbl_cls)
 
-    legend_swatch(d, MAP_X + 20, 946, atlas.NO_REF_COLOR, f'Fără an comparabil ({fmt_int(no_ref_cnt)})')
-    legend_swatch(d, MAP_X + 275, 946, atlas.NON_ARABLE_OUTLINE, f'Non-arabil, contur fin ({fmt_int(non_arable_cnt)})', outline_only=True)
-    d.line((MAP_X + 555, 954, MAP_X + 579, 954), fill=CANAL_RGB, width=3)
-    d.text((MAP_X + 587, 946), 'Canale (OSM)', font=F(14), fill=TXT2)
+    legend_swatch(d, MAP_X + 20, 946, atlas.INCERT_COLOR, f'Grup incert ({fmt_int(incert_cnt)})')
+    legend_swatch(d, MAP_X + 210, 946, atlas.NO_REF_COLOR, f'Fără an comparabil ({fmt_int(no_ref_cnt)})')
+    legend_swatch(d, MAP_X + 445, 946, atlas.NON_ARABLE_OUTLINE, f'Non-arabil ({fmt_int(non_arable_cnt)})', outline_only=True)
+    d.line((MAP_X + 645, 954, MAP_X + 669, 954), fill=CANAL_RGB, width=3)
+    d.text((MAP_X + 677, 946), 'Canale (OSM)', font=F(14), fill=TXT2)
 
     scale_bar(img, map_px_m, 10, MAP_X + MAP_W - 285, 906)
     north_arrow(img, MAP_X + MAP_W - 44, 892, 22)
@@ -346,7 +354,7 @@ def main():
 
     target = OUT / 'harta_erou.png'
     img.convert('RGB').save(target, optimize=True)
-    print('scris:', target, 'și', OUT / 'loss_2024.gpkg', f'| {len(modeled)} parcele cu țintă, {no_ref_cnt} fără an comparabil, {non_arable_cnt} non-arabile, {map_px_m:.1f} m/pixel')
+    print('scris:', target, 'și', OUT / 'loss_2024.gpkg', f'| {len(modeled)} parcele cu țintă, {incert_cnt} grup incert, {no_ref_cnt} fără an comparabil, {non_arable_cnt} non-arabile, {map_px_m:.1f} m/pixel')
 
 
 if __name__ == '__main__':

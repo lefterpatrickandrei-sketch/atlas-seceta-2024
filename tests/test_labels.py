@@ -52,3 +52,17 @@ def test_a_parcel_is_selected_once_and_the_label_starts_empty():
 def test_selection_is_repeatable():
     t = table()
     assert gl.select_label_candidates(t).equals(gl.select_label_candidates(t))
+
+
+def test_select_validation_80_balances_classes_across_blocks():
+    df = pd.DataFrame({
+        'parcel_id': np.arange(1, 201),
+        'area_ha': 3.0,
+        'clasa_irigare': np.where(np.arange(200) < 100, 'irigat', 'neirigat'),
+        'block': [f'b_{i % 50}' for i in range(200)],
+    })
+    out = gl.select_validation_80(df, n_per_class=40, max_per_block=1)
+    assert len(out) == 80
+    assert out.clasa_regula.value_counts().to_dict() == {'irigat': 40, 'neirigat': 40}
+    assert out.irigat.isna().all()
+

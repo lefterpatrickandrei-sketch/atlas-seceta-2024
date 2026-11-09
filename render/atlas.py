@@ -49,7 +49,8 @@ LOSS_CLASS_COLORS = np.array([
     (228, 78, 38),    # 40–55%: roșu-portocaliu
     (178, 34, 38),    # > 55%: roșu intens
 ], dtype=np.uint8)
-NO_REF_COLOR = (82, 90, 102)
+NO_REF_COLOR = (74, 82, 94)
+INCERT_COLOR = (108, 114, 124)
 NON_ARABLE_OUTLINE = (92, 100, 110)
 
 

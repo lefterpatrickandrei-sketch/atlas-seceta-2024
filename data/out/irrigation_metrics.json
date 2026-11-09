@@ -1,0 +1,33 @@
+{
+  "method": "s1_vv_rule_plus_geometric_pivots_spring_only",
+  "n_spring_parcels": 5836,
+  "ha_spring_parcels": 22315.34,
+  "varianta_a_raw": {
+    "irigat": {
+      "n": 1172,
+      "ha": 4281.67
+    },
+    "neirigat": {
+      "n": 3301,
+      "ha": 13155.75
+    },
+    "nedeterminat": {
+      "n": 1363,
+      "ha": 4877.92
+    }
+  },
+  "varianta_b_fara_o7_0615_0627": {
+    "irigat": {
+      "n": 627,
+      "ha": 2943.67
+    },
+    "neirigat": {
+      "n": 4267,
+      "ha": 16838.06
+    },
+    "nedeterminat": {
+      "n": 942,
+      "ha": 2533.61
+    }
+  }
+}
