@@ -31,6 +31,13 @@ INSET_PX_M = 10.0
 CANAL_RGB = (96, 176, 226)
 PIVOT_RGB = (237, 240, 243)     # contur fin, distinct de canale și de non-arabil
 TOWNS = ['Sadova', 'Bechet', 'Dăbuleni', 'Corabia']
+ROUND_MAX_FILL = 0.85                   # D31: un cerc umple 0,785 din dreptunghiul minim, un dreptunghi 1
+
+
+def round_pivots(pivots):
+    """D31: din pivoții geometrici (D26 pct. 4) rămân pe hartă doar parcelele rotunde, după cât umplu dreptunghiul minim."""
+    fill = pivots.area / pivots.geometry.minimum_rotated_rectangle().area
+    return pivots[fill <= ROUND_MAX_FILL]
 
 
 def aoi_polygon():
@@ -266,7 +273,8 @@ def main():
     aoi = aoi_polygon()
     canals = gpd.read_file(OUT / 'canals_osm.gpkg')
     main_canals = canals[canals.waterway == 'canal']
-    pivot_outlines = gpd.read_file(OUT / 'pivots_2024.gpkg').to_crs(CRS).boundary
+    pivot_outlines = round_pivots(gpd.read_file(OUT / 'pivots_2024.gpkg').to_crs(CRS)).boundary
+    print('pivoți desenați (rotunzi):', len(pivot_outlines))
     base_tif = INTERIM / 's2_august_2024.tif'
     bounds = tuple(np.array(aoi.total_bounds) + np.array([-600, -600, 600, 600]))
     colors = parcel_colors(parcels)
