@@ -1,0 +1,284 @@
+{
+ "sursa_codificare": "HR-VPP Product User Manual, Seasonal Trajectories and VPP parameters, Issue 2.5 (31.08.2025), tabelul 4 și §5.3.8",
+ "versiuni": {
+  "2017": "V101",
+  "2018": "V101",
+  "2019": "V101",
+  "2020": "V101",
+  "2021": "V105",
+  "2022": "V105",
+  "2023": "V105",
+  "2024": "V105"
+ },
+ "parcele_in_set": 11048,
+ "pe_grupe": {
+  "primavara": {
+   "eosd": {
+    "n": 4973,
+    "mediana_zile": -17.5,
+    "p25_zile": -30.5,
+    "p75_zile": -2.8,
+    "ic95_zile": [
+     -19.5,
+     -15.5
+    ],
+    "n_blocuri": 81,
+    "mediana_2024": 207.0,
+    "mediana_referinta": 228.5,
+    "data_2024": "26.07",
+    "data_referinta": "16.08"
+   },
+   "length": {
+    "n": 4973,
+    "mediana_zile": -8.0,
+    "p25_zile": -20.0,
+    "p75_zile": 6.0,
+    "ic95_zile": [
+     -9.5,
+     -7.0
+    ],
+    "n_blocuri": 81,
+    "mediana_2024": 77.0,
+    "mediana_referinta": 87.5
+   },
+   "pixeli_valizi_2024_sub_50pct": 0
+  },
+  "toamna": {
+   "eosd": {
+    "n": 6075,
+    "mediana_zile": -19.0,
+    "p25_zile": -43.4,
+    "p75_zile": -8.0,
+    "ic95_zile": [
+     -21.0,
+     -17.7
+    ],
+    "n_blocuri": 80,
+    "mediana_2024": 160.0,
+    "mediana_referinta": 179.0,
+    "data_2024": "9.06",
+    "data_referinta": "28.06"
+   },
+   "length": {
+    "n": 6075,
+    "mediana_zile": -12.5,
+    "p25_zile": -28.5,
+    "p75_zile": 1.0,
+    "ic95_zile": [
+     -14.0,
+     -11.0
+    ],
+    "n_blocuri": 80,
+    "mediana_2024": 92.0,
+    "mediana_referinta": 104.0
+   },
+   "pixeli_valizi_2024_sub_50pct": 2
+  }
+ },
+ "versiuni_v101_v105": {
+  "primavara": {
+   "eosd": {
+    "n_parcele_comune": 1758,
+    "mediana_ref_2017_2023": -12.2,
+    "mediana_ref_doar_v105_2021_2023": -9.8,
+    "ic95_ref_doar_v105": [
+     -13.0,
+     -6.7
+    ]
+   },
+   "length": {
+    "n_parcele_comune": 1758,
+    "mediana_ref_2017_2023": -4.5,
+    "mediana_ref_doar_v105_2021_2023": -2.0,
+    "ic95_ref_doar_v105": [
+     -4.5,
+     0.5
+    ]
+   }
+  },
+  "toamna": {
+   "eosd": {
+    "n_parcele_comune": 3530,
+    "mediana_ref_2017_2023": -19.0,
+    "mediana_ref_doar_v105_2021_2023": -17.5,
+    "ic95_ref_doar_v105": [
+     -19.0,
+     -16.0
+    ]
+   },
+   "length": {
+    "n_parcele_comune": 3530,
+    "mediana_ref_2017_2023": -12.5,
+    "mediana_ref_doar_v105_2021_2023": -12.0,
+    "ic95_ref_doar_v105": [
+     -14.0,
+     -10.0
+    ]
+   }
+  },
+  "non_arabil_v105_minus_v101": {
+   "eosd": {
+    "n": 4229,
+    "mediana_zile": -17.0,
+    "p25_zile": -39.0,
+    "p75_zile": 4.5
+   },
+   "length": {
+    "n": 4229,
+    "mediana_zile": -8.5,
+    "p25_zile": -30.5,
+    "p75_zile": 9.0
+   }
+  }
+ },
+ "pe_an": {
+  "primavara": {
+   "2017": {
+    "n": 4282,
+    "eosd_mediana": 234.0,
+    "eosd_data": "22.08",
+    "length_mediana": 106.5,
+    "pct_fara_eosd": 0.0,
+    "pct_eosd_inainte_de_1_iunie": 0.2,
+    "versiune": "V101"
+   },
+   "2018": {
+    "n": 4071,
+    "eosd_mediana": 242.0,
+    "eosd_data": "30.08",
+    "length_mediana": 95.0,
+    "pct_fara_eosd": 0.0,
+    "pct_eosd_inainte_de_1_iunie": 1.7,
+    "versiune": "V101"
+   },
+   "2019": {
+    "n": 5844,
+    "eosd_mediana": 226.0,
+    "eosd_data": "14.08",
+    "length_mediana": 80.0,
+    "pct_fara_eosd": 0.0,
+    "pct_eosd_inainte_de_1_iunie": 0.1,
+    "versiune": "V101"
+   },
+   "2020": {
+    "n": 5146,
+    "eosd_mediana": 223.8,
+    "eosd_data": "12.08",
+    "length_mediana": 85.0,
+    "pct_fara_eosd": 0.0,
+    "pct_eosd_inainte_de_1_iunie": 2.0,
+    "versiune": "V101"
+   },
+   "2021": {
+    "n": 4582,
+    "eosd_mediana": 226.5,
+    "eosd_data": "14.08",
+    "length_mediana": 82.5,
+    "pct_fara_eosd": 0.0,
+    "pct_eosd_inainte_de_1_iunie": 0.1,
+    "versiune": "V105"
+   },
+   "2022": {
+    "n": 5544,
+    "eosd_mediana": 214.0,
+    "eosd_data": "2.08",
+    "length_mediana": 75.0,
+    "pct_fara_eosd": 0.0,
+    "pct_eosd_inainte_de_1_iunie": 0.5,
+    "versiune": "V105"
+   },
+   "2023": {
+    "n": 4215,
+    "eosd_mediana": 220.0,
+    "eosd_data": "8.08",
+    "length_mediana": 75.5,
+    "pct_fara_eosd": 0.0,
+    "pct_eosd_inainte_de_1_iunie": 0.1,
+    "versiune": "V105"
+   },
+   "2024": {
+    "n": 4973,
+    "eosd_mediana": 207.0,
+    "eosd_data": "26.07",
+    "length_mediana": 77.0,
+    "pct_fara_eosd": 0.0,
+    "pct_eosd_inainte_de_1_iunie": 0.5,
+    "versiune": "V105"
+   }
+  },
+  "toamna": {
+   "2017": {
+    "n": 6751,
+    "eosd_mediana": 217.0,
+    "eosd_data": "5.08",
+    "length_mediana": 125.0,
+    "pct_fara_eosd": 0.0,
+    "pct_eosd_inainte_de_1_iunie": 0.3,
+    "versiune": "V101"
+   },
+   "2018": {
+    "n": 6977,
+    "eosd_mediana": 213.5,
+    "eosd_data": "2.08",
+    "length_mediana": 122.0,
+    "pct_fara_eosd": 0.0,
+    "pct_eosd_inainte_de_1_iunie": 1.7,
+    "versiune": "V101"
+   },
+   "2019": {
+    "n": 5204,
+    "eosd_mediana": 213.0,
+    "eosd_data": "1.08",
+    "length_mediana": 101.0,
+    "pct_fara_eosd": 0.0,
+    "pct_eosd_inainte_de_1_iunie": 0.1,
+    "versiune": "V101"
+   },
+   "2020": {
+    "n": 5902,
+    "eosd_mediana": 172.0,
+    "eosd_data": "21.06",
+    "length_mediana": 97.0,
+    "pct_fara_eosd": 0.0,
+    "pct_eosd_inainte_de_1_iunie": 4.3,
+    "versiune": "V101"
+   },
+   "2021": {
+    "n": 5801,
+    "eosd_mediana": 177.0,
+    "eosd_data": "26.06",
+    "length_mediana": 104.0,
+    "pct_fara_eosd": 0.0,
+    "pct_eosd_inainte_de_1_iunie": 0.4,
+    "versiune": "V105"
+   },
+   "2022": {
+    "n": 5504,
+    "eosd_mediana": 169.0,
+    "eosd_data": "18.06",
+    "length_mediana": 94.5,
+    "pct_fara_eosd": 0.0,
+    "pct_eosd_inainte_de_1_iunie": 0.5,
+    "versiune": "V105"
+   },
+   "2023": {
+    "n": 6825,
+    "eosd_mediana": 180.0,
+    "eosd_data": "29.06",
+    "length_mediana": 112.0,
+    "pct_fara_eosd": 0.0,
+    "pct_eosd_inainte_de_1_iunie": 2.5,
+    "versiune": "V105"
+   },
+   "2024": {
+    "n": 6075,
+    "eosd_mediana": 160.0,
+    "eosd_data": "9.06",
+    "length_mediana": 92.0,
+    "pct_fara_eosd": 0.0,
+    "pct_eosd_inainte_de_1_iunie": 20.9,
+    "versiune": "V105"
+   }
+  }
+ }
+}
