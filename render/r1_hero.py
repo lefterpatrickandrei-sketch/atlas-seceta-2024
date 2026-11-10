@@ -225,6 +225,11 @@ def draw_group_distribution(img, x0, y0, width, modeled):
                 t_str = f'{tick:+d}%'.replace('-', '−').replace('+0%', '0%')
                 d.text((tx - F(12).getlength(t_str) / 2, ax_y + 13), t_str, font=F(12), fill=MUTED)
 
+    # D34: toamna se raportează ca interval; referința restrânsă vine din scripts/robustete_referinta.py
+    alt = json.loads((OUT / 'robustete_referinta.json').read_text(encoding='utf-8'))['pe_grupe']
+    spring, autumn = (alt[g]['b_2021_2023']['mediana_pct'] for g in ('primavara', 'toamna'))
+    d.text((x0, y0 + 306), f'Cu referința 2021–2023: primăvară {spring:.0f}%, toamnă {autumn:.0f}% (mediane; ținta oficială: 2017–2023)', font=F(13, 'Medium'), fill=TXT2)
+
 
 def draw_radar_panel(img, x0, y0, width, placebo):
     """Panou 3 (D30): regula radar, testul placebo pe miriștile de toamnă și concluzia. Cifrele vin din diagnosticul S1."""
