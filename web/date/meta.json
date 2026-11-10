@@ -1,0 +1,69 @@
+{
+ "titlu": "Atlasul secetei din 2024 — sudul Olteniei",
+ "parcele": 17466,
+ "parcele_cu_referinta": 11048,
+ "legenda_titlu": "Pierderea observată în 2024 (11.048 parcele cu referință)",
+ "legenda": [
+  {
+   "cod": 0,
+   "eticheta": "câștig (< 0%)",
+   "culoare": "#24a286",
+   "tip": "umplere"
+  },
+  {
+   "cod": 1,
+   "eticheta": "0–10%",
+   "culoare": "#8a9498",
+   "tip": "umplere"
+  },
+  {
+   "cod": 2,
+   "eticheta": "10–25%",
+   "culoare": "#cca254",
+   "tip": "umplere"
+  },
+  {
+   "cod": 3,
+   "eticheta": "25–40%",
+   "culoare": "#e88030",
+   "tip": "umplere"
+  },
+  {
+   "cod": 4,
+   "eticheta": "40–55%",
+   "culoare": "#e44e26",
+   "tip": "umplere"
+  },
+  {
+   "cod": 5,
+   "eticheta": "> 55%",
+   "culoare": "#b22226",
+   "tip": "umplere"
+  },
+  {
+   "cod": 7,
+   "eticheta": "Grup incert (1.036)",
+   "culoare": "#6c727c",
+   "tip": "umplere"
+  },
+  {
+   "cod": 6,
+   "eticheta": "Fără an comparabil (1.153)",
+   "culoare": "#4a525e",
+   "tip": "umplere"
+  },
+  {
+   "cod": 8,
+   "eticheta": "Non-arabil (4.229)",
+   "culoare": "#5c646e",
+   "tip": "contur"
+  }
+ ],
+ "incadrare": [
+  23.85,
+  43.7005,
+  24.55,
+  44.0005
+ ],
+ "zecimale_coordonate": 5
+}
