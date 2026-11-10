@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Atlasul secetei din 2024 — sudul Olteniei</title>
+<meta name="description" content="Pierderea de productivitate a vegetației în 2024, parcelă cu parcelă, în sudul Olteniei (GIS Day 2026).">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css"
+      integrity="sha384-MinO0mNliZ3vwppuPOUnGa+iq619pfMhLVUXfC4LHwSCvF9H+6P/KO4Q7qBOYV5V" crossorigin="anonymous">
+<style>
+  :root {
+    --bg: #0c1015; --panel: #171e26; --line: #303a46;
+    --txt: #edf0f3; --txt2: #a5afba; --muted: #727e8b;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--txt); }
+  body {
+    display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden;
+    font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  header { flex: none; padding: 10px 14px 8px; border-bottom: 1px solid var(--line); }
+  h1 { margin: 0; font-size: 16px; line-height: 1.25; font-weight: 650; }
+  header p { margin: 2px 0 0; font-size: 12px; color: var(--txt2); }
+  #harta { flex: 1 1 auto; position: relative; min-height: 0; }
+  footer {
+    flex: none; padding: 7px 14px calc(8px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line); font-size: 11px; line-height: 1.35; color: var(--txt2);
+  }
+  footer p { margin: 0 0 3px; overflow-wrap: anywhere; }
+  footer p:last-child { margin: 0; }
+  footer strong { color: var(--txt); font-weight: 600; }
+  .legenda {
+    position: absolute; top: 10px; left: 10px; z-index: 2; max-width: calc(100% - 64px);
+    background: rgba(23, 30, 38, 0.93); border: 1px solid var(--line); border-radius: 10px; padding: 7px 10px 8px;
+  }
+  .legenda summary { cursor: pointer; font-size: 12px; font-weight: 600; color: var(--txt); }
+  .legenda ul { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 12px; }
+  .legenda li { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--txt2); white-space: nowrap; }
+  .legenda .gri { margin-top: 5px; }
+  .simbol { width: 18px; height: 10px; border-radius: 2px; flex: none; }
+  .simbol.contur { border: 1.5px solid; background: transparent; }
+  .legenda .nota { margin: 6px 0 0; font-size: 11px; color: var(--muted); }
+  .stare {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 3; max-width: 90%;
+    padding: 8px 12px; border-radius: 8px; background: var(--panel); border: 1px solid var(--line); font-size: 13px; text-align: center;
+  }
+  .stare[hidden] { display: none; }
+  .maplibregl-popup-content {
+    background: var(--panel); color: var(--txt); border: 1px solid var(--line); border-radius: 8px;
+    padding: 9px 30px 9px 11px; font-size: 13px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  }
+  .maplibregl-popup-content p { margin: 0; }
+  .maplibregl-popup-content p + p { margin-top: 3px; color: var(--txt2); }
+  .maplibregl-popup-close-button { color: var(--txt2); font-size: 18px; width: 28px; height: 28px; }
+  .maplibregl-popup-anchor-top .maplibregl-popup-tip, .maplibregl-popup-anchor-top-left .maplibregl-popup-tip,
+  .maplibregl-popup-anchor-top-right .maplibregl-popup-tip { border-bottom-color: var(--panel); }
+  .maplibregl-popup-anchor-bottom .maplibregl-popup-tip, .maplibregl-popup-anchor-bottom-left .maplibregl-popup-tip,
+  .maplibregl-popup-anchor-bottom-right .maplibregl-popup-tip { border-top-color: var(--panel); }
+  .maplibregl-popup-anchor-left .maplibregl-popup-tip { border-right-color: var(--panel); }
+  .maplibregl-popup-anchor-right .maplibregl-popup-tip { border-left-color: var(--panel); }
+  .maplibregl-ctrl-attrib { font-size: 10px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Atlasul secetei din 2024 — sudul Olteniei</h1>
+  <p>GIS Day 2026 · atinge o parcelă pentru detalii</p>
+</header>
+<main id="harta" aria-label="Harta pierderii de productivitate pe parcele">
+  <details class="legenda" open>
+    <summary id="legenda-titlu">Pierderea observată în 2024</summary>
+    <ul id="legenda-clase"></ul>
+    <ul id="legenda-gri" class="gri"></ul>
+    <p class="nota">„câștig” = 2024 peste mediana anilor comparabili</p>
+  </details>
+  <div id="stare" class="stare" role="status">Se încarcă parcelele…</div>
+</main>
+<footer>
+  <p><strong>Pierdere de productivitate a vegetației (HR-VPP TPROD) față de anii 2017–2023 cu același tip de cultură. Nu e recoltă în t/ha.</strong></p>
+  <p>Surse: Contains modified Copernicus Sentinel data 2024 · Generated using European Union's Copernicus Land Monitoring Service information (HR-VPP, modificat) ·
+     parcele Fields of The World (model CC BY-NC, uz necomercial) · EUCROPMAP 2022 © Uniunea Europeană, JRC (CC BY 4.0, folosit pentru masca de arabil).</p>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"
+        integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
+<script>
+(() => {
+  'use strict';
+  const STIL = 'https://tiles.openfreemap.org/styles/dark';   // OpenFreeMap: gratuit, fără chei; atribuirea vine din stil
+  const PAKO = { src: 'https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako_inflate.min.js',
+                 integrity: 'sha384-taEjHL+GUvC8IhXeCaTNUxz3O8ItsajGFLDFj4v/VJvM24HU36qP/6sRpuAGGfeT' };
+  const GRUP = { 1: 'primăvară', 2: 'toamnă' };
+  const NR = new Intl.NumberFormat('ro-RO', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const stare = document.getElementById('stare');
+
+  function arata(mesaj) { stare.textContent = mesaj; stare.hidden = !mesaj; }
+  function numar(v) { return NR.format(v).replace('-', '−'); }
+
+  function incarcaScript({ src, integrity }) {
+    return new Promise((ok, eroare) => {
+      const s = document.createElement('script');
+      Object.assign(s, { src, integrity, crossOrigin: 'anonymous', onload: ok, onerror: eroare });
+      document.head.appendChild(s);
+    });
+  }
+
+  // GeoJSON comprimat gzip: decomprimare în browser (DecompressionStream sau, pe browsere vechi, pako)
+  async function incarcaParcele(url) {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const brut = new Uint8Array(await r.arrayBuffer());
+    let octeti = brut;
+    if (brut[0] === 0x1f && brut[1] === 0x8b) {
+      if ('DecompressionStream' in window) {
+        const flux = new Blob([brut]).stream().pipeThrough(new DecompressionStream('gzip'));
+        octeti = new Uint8Array(await new Response(flux).arrayBuffer());
+      } else {
+        await incarcaScript(PAKO);
+        octeti = window.pako.inflate(brut);
+      }
+    }
+    return JSON.parse(new TextDecoder('utf-8').decode(octeti));
+  }
+
+  function legenda(meta) {
+    document.getElementById('legenda-titlu').textContent = meta.legenda_titlu;
+    for (const clasa of meta.legenda) {
+      const li = document.createElement('li');
+      const simbol = document.createElement('span');
+      simbol.className = 'simbol' + (clasa.tip === 'contur' ? ' contur' : '');
+      if (clasa.tip === 'contur') simbol.style.borderColor = clasa.culoare; else simbol.style.background = clasa.culoare;
+      li.append(simbol, document.createTextNode(clasa.eticheta));
+      document.getElementById(clasa.cod <= 5 ? 'legenda-clase' : 'legenda-gri').appendChild(li);
+    }
+  }
+
+  function continut(p) {
+    const randuri = [];
+    if (p.c <= 5) randuri.push(`Pierdere: ${numar(p.p)}%` + (p.p < 0 ? ' (câștig)' : ''));
+    else if (p.c === 6) randuri.push('Pierdere: fără an comparabil');
+    else if (p.c === 7) randuri.push('Grup incert: parcela nu e comparată');
+    else randuri.push('Parcelă non-arabilă: fără pierdere calculată');
+    if (p.c <= 6) randuri.push(`Grup de cultură 2024: ${GRUP[p.g]}`);
+    randuri.push(`Suprafață: ${numar(p.a)} ha`);
+    const div = document.createElement('div');
+    for (const text of randuri) { const el = document.createElement('p'); el.textContent = text; div.appendChild(el); }
+    return div;
+  }
+
+  async function porneste() {
+    if (location.protocol === 'file:') { arata('Deschide pagina printr-un server web (http/https), nu direct din fișier.'); return; }
+    const meta = await (await fetch('date/meta.json')).json();
+    legenda(meta);
+    const [w, s, e, n] = meta.incadrare;
+    const harta = new maplibregl.Map({
+      container: 'harta', style: STIL, bounds: [[w, s], [e, n]], fitBoundsOptions: { padding: 16 },
+      maxBounds: [[w - 0.3, s - 0.25], [e + 0.3, n + 0.25]], minZoom: 8, maxZoom: 17,
+      attributionControl: false, dragRotate: false, pitchWithRotate: false, touchPitch: false
+    });
+    harta.touchZoomRotate.disableRotation();
+    harta.addControl(new maplibregl.AttributionControl({ compact: false }), 'bottom-right');
+    harta.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+    const date = incarcaParcele('date/parcele.geojson.gz');
+    const culori = ['match', ['get', 'c']];
+    for (const clasa of meta.legenda) if (clasa.tip === 'umplere') culori.push(clasa.cod, clasa.culoare);
+    culori.push('#000000');
+    const contur = meta.legenda.find((c) => c.tip === 'contur').culoare;
+
+    harta.on('load', async () => {
+      try {
+        const geo = await date;
+        const eticheta = harta.getStyle().layers.find((l) => l.type === 'symbol');
+        const sub = eticheta ? eticheta.id : undefined;   // parcelele stau sub denumirile de pe fundal
+        harta.addSource('parcele', { type: 'geojson', data: geo, generateId: true, maxzoom: 15, tolerance: 0.3 });
+        harta.addLayer({ id: 'parcele-umplere', type: 'fill', source: 'parcele', filter: ['<', ['get', 'c'], 8],
+                         paint: { 'fill-color': culori, 'fill-opacity': 0.9 } }, sub);
+        harta.addLayer({ id: 'parcele-non-arabil', type: 'fill', source: 'parcele', filter: ['==', ['get', 'c'], 8],
+                         paint: { 'fill-color': contur, 'fill-opacity': 0.01 } }, sub);
+        harta.addLayer({ id: 'parcele-margini', type: 'line', source: 'parcele',
+                         paint: { 'line-color': ['case', ['==', ['get', 'c'], 8], contur, '#0c1015'],
+                                  'line-width': ['interpolate', ['linear'], ['zoom'], 9, ['case', ['==', ['get', 'c'], 8], 0.5, 0], 12, 0.6, 16, 1.4] } }, sub);
+        harta.addLayer({ id: 'parcela-aleasa', type: 'line', source: 'parcele', filter: ['==', ['id'], -1],
+                         paint: { 'line-color': '#ffffff', 'line-width': 2.5 } });
+        const fereastra = new maplibregl.Popup({ closeButton: true, maxWidth: '260px', offset: 6 });
+        fereastra.on('close', () => harta.setFilter('parcela-aleasa', ['==', ['id'], -1]));
+        harta.on('click', (ev) => {
+          const f = harta.queryRenderedFeatures(ev.point, { layers: ['parcele-umplere', 'parcele-non-arabil'] })[0];
+          if (!f) { fereastra.remove(); return; }
+          harta.setFilter('parcela-aleasa', ['==', ['id'], f.id]);
+          fereastra.setLngLat(ev.lngLat).setDOMContent(continut(f.properties)).addTo(harta);
+        });
+        for (const strat of ['parcele-umplere', 'parcele-non-arabil']) {
+          harta.on('mouseenter', strat, () => { harta.getCanvas().style.cursor = 'pointer'; });
+          harta.on('mouseleave', strat, () => { harta.getCanvas().style.cursor = ''; });
+        }
+        harta.once('idle', () => arata(''));
+      } catch (err) {
+        console.error(err);
+        arata('Nu s-au putut încărca parcelele.');
+      }
+    });
+    harta.on('error', (ev) => console.warn('hartă:', ev && ev.error ? ev.error.message : ev));
+  }
+
+  porneste().catch((err) => { console.error(err); arata('Nu s-a putut porni harta.'); });
+})();
+</script>
+</body>
+</html>
