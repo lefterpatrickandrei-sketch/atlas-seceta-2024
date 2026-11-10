@@ -23,3 +23,6 @@ API-*.txt
 # Fonturile se aduc cu scripts/get_fonts.py; video-urile rămân locale
 render/fonts/
 *.mp4
+
+# Copia publică a hărții web (repo git separat, atlas-seceta-2024)
+_publish/

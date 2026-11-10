@@ -5,12 +5,14 @@ numără octeții transferați la încărcare și salvează o captură mică în
 Testul e „din exterior”: parcelele se recunosc după culorile claselor din web/date/meta.json, nu prin codul paginii.
 
 Cere Playwright, care nu e în .venv-ul proiectului; în orice mediu cu `pip install playwright` și cu Edge instalat:
-  python -X utf8 scripts/test_web.py
+  python -X utf8 scripts/test_web.py                 # local, pe web/
+  python -X utf8 scripts/test_web.py https://...     # pe adresa publică
 """
 import functools
 import http.server
 import io
 import json
+import sys
 import threading
 from pathlib import Path
 
@@ -50,8 +52,9 @@ def class_pixels(png, colors):
 def main():
     meta = json.loads((WEB / 'date' / 'meta.json').read_text(encoding='utf-8'))
     fill = {c['cod']: c['culoare'] for c in meta['legenda'] if c['tip'] == 'umplere'}
-    server = serve()
-    url = f'http://127.0.0.1:{server.server_address[1]}/'
+    server = None if len(sys.argv) > 1 else serve()
+    url = sys.argv[1] if server is None else f'http://127.0.0.1:{server.server_address[1]}/'
+    report_url = {'adresa_testata': url}
     report, errors, transfer = {}, [], {}
     with sync_playwright() as p:
         browser = p.chromium.launch(channel='msedge', headless=True,
@@ -113,7 +116,8 @@ def main():
         }""")
         page.screenshot(path=str(SHOT))
         browser.close()
-    server.shutdown()
+    if server is not None:
+        server.shutdown()
 
     by_host = {}
     for u, n in transfer.items():
@@ -122,6 +126,7 @@ def main():
     report['transfer_mb'] = round(sum(transfer.values()) / 1e6, 2)
     report['transfer_pe_gazda_kb'] = {h: round(n / 1e3) for h, n in sorted(by_host.items(), key=lambda kv: -kv[1])}
     report['erori_consola'] = errors
+    report.update(report_url)
     print(json.dumps(report, ensure_ascii=False, indent=1))
 
 
