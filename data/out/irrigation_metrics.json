@@ -48,5 +48,129 @@
       "ha": 2533.61
     }
   },
-  "panou3_gate_passed": false
+  "panou3_gate_passed": false,
+  "validation_olofsson_by_parcels": {
+    "n_evaluated": 64,
+    "n_per_stratum": {
+      "irigat": 31,
+      "neirigat": 33
+    },
+    "confusion_counts": {
+      "irigat_to_irigat": 13,
+      "irigat_to_neirigat": 18,
+      "neirigat_to_irigat": 16,
+      "neirigat_to_neirigat": 17
+    },
+    "weights": {
+      "irigat": 0.12811606048222313,
+      "neirigat": 0.8718839395177769
+    },
+    "user_accuracy": {
+      "irigat": {
+        "est": 0.41935483870967744,
+        "se": 0.0900918712501222,
+        "ci95": [
+          0.24277477105943793,
+          0.595934906359917
+        ]
+      },
+      "neirigat": {
+        "est": 0.5151515151515151,
+        "se": 0.08834775598250455,
+        "ci95": [
+          0.3419899134258062,
+          0.6883131168772241
+        ]
+      }
+    },
+    "producer_accuracy": {
+      "irigat": {
+        "est": 0.11276151109974575,
+        "se": 0.0281834271202827,
+        "ci95": [
+          0.057521993943991656,
+          0.16800102825549984
+        ]
+      },
+      "neirigat": {
+        "est": 0.8579102965228581,
+        "se": 0.028191870617356802,
+        "ci95": [
+          0.8026542301128388,
+          0.9131663629328775
+        ]
+      }
+    },
+    "overall_accuracy": {
+      "est": 0.5028784223584967,
+      "se": 0.07788894639242798,
+      "ci95": [
+        0.35021608742933785,
+        0.6555407572876555
+      ]
+    },
+    "note": "Clasa „nedeterminat” nu este evaluată; ponderile W_i însumează 1 pe domeniul evaluat {irigat, neirigat}."
+  },
+  "validation_olofsson_by_ha": {
+    "n_evaluated": 64,
+    "n_per_stratum": {
+      "irigat": 31,
+      "neirigat": 33
+    },
+    "confusion_counts": {
+      "irigat_to_irigat": 13,
+      "irigat_to_neirigat": 18,
+      "neirigat_to_irigat": 16,
+      "neirigat_to_neirigat": 17
+    },
+    "weights": {
+      "irigat": 0.148807510768775,
+      "neirigat": 0.8511924892312249
+    },
+    "user_accuracy": {
+      "irigat": {
+        "est": 0.41935483870967744,
+        "se": 0.0900918712501222,
+        "ci95": [
+          0.24277477105943793,
+          0.595934906359917
+        ]
+      },
+      "neirigat": {
+        "est": 0.5151515151515151,
+        "se": 0.08834775598250455,
+        "ci95": [
+          0.3419899134258062,
+          0.6883131168772241
+        ]
+      }
+    },
+    "producer_accuracy": {
+      "irigat": {
+        "est": 0.13134669810013522,
+        "se": 0.0321409105565805,
+        "ci95": [
+          0.06835051340923744,
+          0.194342882791033
+        ]
+      },
+      "neirigat": {
+        "est": 0.8353881140377204,
+        "se": 0.031803058487976474,
+        "ci95": [
+          0.7730541194012865,
+          0.8977221086741543
+        ]
+      }
+    },
+    "overall_accuracy": {
+      "est": 0.5008962501902835,
+      "se": 0.07638659877189505,
+      "ci95": [
+        0.3511785165973692,
+        0.6506139837831978
+      ]
+    },
+    "note": "Clasa „nedeterminat” nu este evaluată; ponderile W_i însumează 1 pe domeniul evaluat {irigat, neirigat}."
+  }
 }
