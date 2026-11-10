@@ -1,4 +1,8 @@
 {
+  "validation_status": "invalidă: etichete neconforme cu criteriul",
+  "validation_note": "Etichetele din labels.csv au marcat parcele închise la culoare, nu parcele cu vegetație roșie în NIR, cum cerea criteriul foilor. Evaluarea Olofsson din commit-ul efc72ae nu se folosește și nu se citează (D36). Concluzia despre radar se sprijină doar pe testul placebo (D30).",
+  "irigat_layer_status": "nevalidat, nelivrabil (D36)",
+  "panou3_gate_status": "neevaluată: etichete invalide (D36)",
   "method": "s1_vv_rule_plus_geometric_pivots_varianta_b_fara_o7_0615_0627",
   "excluded_transitions": [
     "o7_0615_0627"
@@ -48,8 +52,9 @@
       "ha": 2533.61
     }
   },
-  "panou3_gate_passed": false,
+  "panou3_gate_passed": null,
   "validation_olofsson_by_parcels": {
+    "status": "invalidă: etichete neconforme cu criteriul",
     "n_evaluated": 64,
     "n_per_stratum": {
       "irigat": 31,
@@ -112,6 +117,7 @@
     "note": "Clasa „nedeterminat” nu este evaluată; ponderile W_i însumează 1 pe domeniul evaluat {irigat, neirigat}."
   },
   "validation_olofsson_by_ha": {
+    "status": "invalidă: etichete neconforme cu criteriul",
     "n_evaluated": 64,
     "n_per_stratum": {
       "irigat": 31,

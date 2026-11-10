@@ -7,6 +7,9 @@ fișiere în data/interim/sarcina2_verificare/ și verifică apoi că ies identi
 compară înainte și după. În data/out se scriu doar irrigation_metrics.json (rezultatul celulei 4) și lista parcelelor
 în care eticheta contrazice clasa radar (D27 pct. 6).
 
+Evaluarea produsă în commit-ul efc72ae e invalidă (D36): etichetele din labels.csv nu respectă criteriul foilor. Cât timp
+irrigation_metrics.json o marchează invalidă, scriptul refuză să ruleze; --forteaza e doar pentru etichete noi, conforme.
+
 Rulare, din rădăcina proiectului: .venv/Scripts/python.exe -X utf8 scripts/sarcina2_evaluare.py
 """
 import hashlib
@@ -27,7 +30,8 @@ NOTEBOOK = ROOT / 'notebooks' / '03b_irrigation.ipynb'
 OFFICIAL = ('pivots_2024.gpkg', 'pivots_2024.parquet', 'irrigation_2024.parquet', 'irrigation_2024.gpkg', 's1_transitions_2024.csv')
 CHECK = INTERIM / 'sarcina2_verificare'
 WRONG = OUT / 'validare_parcele_gresite.csv'
-NEW_KEYS = ('validation_olofsson_by_parcels', 'validation_olofsson_by_ha', 'panou3_gate_passed')
+NEW_KEYS = ('validation_olofsson_by_parcels', 'validation_olofsson_by_ha', 'panou3_gate_passed',
+            'validation_status', 'validation_note', 'irigat_layer_status', 'panou3_gate_status')
 
 
 def sha(path):
@@ -66,6 +70,10 @@ def pct(v):
 
 
 def main():
+    current = json.loads((OUT / 'irrigation_metrics.json').read_text(encoding='utf-8'))
+    if str(current.get('validation_status', '')).startswith('invalidă') and '--forteaza' not in sys.argv:
+        sys.exit('Evaluarea e marcată invalidă (D36): etichetele din labels.csv nu respectă criteriul. '
+                 'O rulare ar suprascrie marcajul; folosește --forteaza doar cu etichete noi.')
     before = {name: sha(OUT / name) for name in OFFICIAL + ('labels.csv',)}
     CHECK.mkdir(parents=True, exist_ok=True)
     redirect_official_writes()
