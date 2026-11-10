@@ -26,7 +26,7 @@ DEPĂȘIT = rezultatul există, dar a fost calculat pe o țintă care între tim
 În afara listei: 03f, canalele OSM, e gata (`6ef00d6`; `data/out/parcel_canals.parquet`, 17.466 de rânduri).
 
 ## Verificări rulate la robustețea referinței și figura sfârșitului de sezon
-- **Robustețe:** `scripts/robustete_referinta.py` reface întâi ținta oficială identic (03e, tăiere P1/P99) și abia apoi restrânge referința. Pe non-arabilul stabil, TPROD V105/V101 = +7,4% (D19: +7,0%), iar 2020–2023 față de 2017–2019 = −5,7%: anii secetoși 2020 și 2022 coboară mediana, nu un salt de procesare.
+- **Robustețe:** `scripts/robustete_referinta.py` reface întâi ținta oficială identic (03e, tăiere P1/P99) și abia apoi restrânge referința. Pe non-arabilul stabil, TPROD V105/V101 = +7,4% (D19: +7,0%), iar 2020–2023 față de 2017–2019 = −5,7%: anii slabi 2020 și 2022 coboară mediana, nu un salt de procesare.
 - **`sfarsit_sezon.png`:** medianele pe ani sunt recalculate din `parcel_eos.parquet` și comparate cu `eos_metrics.json`; scriptul de verificare a textelor dă 0 probleme (1920×1080, sursă în subsol, diacritice). Am verificat aspectul pe o miniatură.
 
 ## Verificări rulate la Sarcina 5
