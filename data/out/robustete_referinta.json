@@ -1,0 +1,117 @@
+{
+ "definitie": "loss_rel like-for-like (D21), aceeași procedură ca 03e; fiecare referință are propria tăiere P1/P99",
+ "pe_grupe": {
+  "primavara": {
+   "oficial_2017_2023": {
+    "n": 4973,
+    "mediana_pct": 30.1,
+    "p25_pct": 1.4,
+    "p75_pct": 52.1
+   },
+   "a_2020_2023": {
+    "n": 3812,
+    "mediana_pct": 23.5,
+    "p25_pct": -6.6,
+    "p75_pct": 46.7
+   },
+   "b_2021_2023": {
+    "n": 1758,
+    "mediana_pct": 28.8,
+    "p25_pct": -4.2,
+    "p75_pct": 53.6
+   },
+   "oficial_pe_parcelele_a_2020_2023": {
+    "n": 3812,
+    "mediana_pct": 27.6,
+    "p25_pct": -1.8,
+    "p75_pct": 49.7
+   },
+   "oficial_pe_parcelele_b_2021_2023": {
+    "n": 1758,
+    "mediana_pct": 27.4,
+    "p25_pct": -7.4,
+    "p75_pct": 52.3
+   }
+  },
+  "toamna": {
+   "oficial_2017_2023": {
+    "n": 6075,
+    "mediana_pct": -0.2,
+    "p25_pct": -33.2,
+    "p75_pct": 24.8
+   },
+   "a_2020_2023": {
+    "n": 5377,
+    "mediana_pct": 4.6,
+    "p25_pct": -27.3,
+    "p75_pct": 29.3
+   },
+   "b_2021_2023": {
+    "n": 3530,
+    "mediana_pct": 18.5,
+    "p25_pct": -10.6,
+    "p75_pct": 40.6
+   },
+   "oficial_pe_parcelele_a_2020_2023": {
+    "n": 5377,
+    "mediana_pct": 0.5,
+    "p25_pct": -31.3,
+    "p75_pct": 25.3
+   },
+   "oficial_pe_parcelele_b_2021_2023": {
+    "n": 3530,
+    "mediana_pct": 6.1,
+    "p25_pct": -25.7,
+    "p75_pct": 29.9
+   }
+  }
+ },
+ "non_arabil_stabil": {
+  "definitie": "non-arabil, NDVI aprilie ≥ 0,40 în toți cei 8 ani, TPROD valid în toți cei 8 ani",
+  "n": 1267,
+  "tprod_mediana_pe_an": {
+   "2017": 1792.9,
+   "2018": 1723.6,
+   "2019": 1688.9,
+   "2020": 1361.6,
+   "2021": 1891.9,
+   "2022": 1401.2,
+   "2023": 1796.6,
+   "2024": 1489.9
+  },
+  "eosd_mediana_pe_an": {
+   "2017": 278.0,
+   "2018": 277.0,
+   "2019": 275.0,
+   "2020": 278.0,
+   "2021": 282.0,
+   "2022": 281.0,
+   "2023": 278.0,
+   "2024": 254.0
+  },
+  "2017_2019_vs_2020_2023": {
+   "tprod_dif_rel_pct": {
+    "mediana": -5.7,
+    "p25": -17.2,
+    "p75": 7.3
+   },
+   "eosd_dif_zile": {
+    "mediana": -0.5,
+    "p25": -22.5,
+    "p75": 10.5
+   }
+  },
+  "v101_2017_2020_vs_v105_2021_2023": {
+   "tprod_dif_rel_pct": {
+    "mediana": 7.4,
+    "p25": -4.4,
+    "p75": 20.3
+   },
+   "eosd_dif_zile": {
+    "mediana": -0.5,
+    "p25": -21.5,
+    "p75": 12.5
+   }
+  }
+ }
+}
