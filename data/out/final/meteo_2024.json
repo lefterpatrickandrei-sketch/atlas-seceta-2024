@@ -1,0 +1,93 @@
+{
+ "sursa": "ERA5-Land (C3S), ECMWF/ERA5_LAND/DAILY_AGGR în Earth Engine; total_precipitation_sum (m → mm), temperature_2m_max (K → °C)",
+ "zona": "AOI_BBOX tăiat la granița României; medie ponderată pe suprafața celulelor",
+ "normala": "1991–2020, aceleași luni",
+ "prag_zile_calde_c": 35.0,
+ "zile_calde_definitie": "zile în care Tmax mediată pe zonă ≥ 35 °C",
+ "sfarsit_sezon_vegetatie_2024": {
+  "toamnă": "2024-06-09",
+  "primăvară": "2024-07-26"
+ },
+ "lunar": [
+  {
+   "luna": 4,
+   "nume": "apr.",
+   "precip_2024_mm": 55.4,
+   "precip_normala_mm": 56.8,
+   "precip_pct_din_normala": 98.0,
+   "tmax_2024_c": 21.6,
+   "tmax_normala_c": 18.1,
+   "tmax_anomalie_c": 3.5,
+   "zile_tmax_35_2024": 0,
+   "zile_tmax_35_normala": 0.0
+  },
+  {
+   "luna": 5,
+   "nume": "mai",
+   "precip_2024_mm": 91.2,
+   "precip_normala_mm": 68.5,
+   "precip_pct_din_normala": 133.0,
+   "tmax_2024_c": 21.3,
+   "tmax_normala_c": 23.4,
+   "tmax_anomalie_c": -2.1,
+   "zile_tmax_35_2024": 0,
+   "zile_tmax_35_normala": 0.0
+  },
+  {
+   "luna": 6,
+   "nume": "iun.",
+   "precip_2024_mm": 24.3,
+   "precip_normala_mm": 76.7,
+   "precip_pct_din_normala": 32.0,
+   "tmax_2024_c": 31.6,
+   "tmax_normala_c": 27.4,
+   "tmax_anomalie_c": 4.3,
+   "zile_tmax_35_2024": 3,
+   "zile_tmax_35_normala": 0.7
+  },
+  {
+   "luna": 7,
+   "nume": "iul.",
+   "precip_2024_mm": 32.2,
+   "precip_normala_mm": 68.7,
+   "precip_pct_din_normala": 47.0,
+   "tmax_2024_c": 33.7,
+   "tmax_normala_c": 29.7,
+   "tmax_anomalie_c": 3.9,
+   "zile_tmax_35_2024": 13,
+   "zile_tmax_35_normala": 2.7
+  },
+  {
+   "luna": 8,
+   "nume": "aug.",
+   "precip_2024_mm": 9.9,
+   "precip_normala_mm": 47.1,
+   "precip_pct_din_normala": 21.0,
+   "tmax_2024_c": 33.2,
+   "tmax_normala_c": 29.9,
+   "tmax_anomalie_c": 3.4,
+   "zile_tmax_35_2024": 7,
+   "zile_tmax_35_normala": 2.3
+  },
+  {
+   "luna": 9,
+   "nume": "sep.",
+   "precip_2024_mm": 52.9,
+   "precip_normala_mm": 51.8,
+   "precip_pct_din_normala": 102.0,
+   "tmax_2024_c": 26.4,
+   "tmax_normala_c": 24.5,
+   "tmax_anomalie_c": 1.9,
+   "zile_tmax_35_2024": 0,
+   "zile_tmax_35_normala": 0.1
+  }
+ ],
+ "aprilie_septembrie": {
+  "precip_2024_mm": 265.9,
+  "precip_normala_mm": 369.5,
+  "precip_pct_din_normala": 72.0,
+  "tmax_anomalie_medie_c": 2.5,
+  "zile_tmax_35_2024": 23,
+  "zile_tmax_35_normala": 5.8
+ }
+}
