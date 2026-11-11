@@ -152,22 +152,50 @@ Fluxul transformă pixeli satelitari în indicatori agronomici la nivel de parce
 
 ## 🤖 Arhitectura Bucla Agentică (Omul în Buclă)
 
-Spre deosebire de o simplă interogare chat, proiectul a funcționat ca o arhitectură de dezvoltare asistată pe două niveluri:
+Spre deosebire de o simplă interogare chat, proiectul a funcționat ca o arhitectură de dezvoltare asistată de tip **Human-in-the-Loop**, structurată pe 4 etape distincte:
 
-```
-┌────────────────────────────────────────────────────────────────────────────────┐
-│ NIVELUL 1: BUCLA AGENTICĂ AUTONOMĂ (Antigravity IDE)                          │
-│                                                                                │
-│   [1. SCRIE CODUL] ──► [2. EXECUȚIE EXTERNĂ]                                   │
-│   Claude Opus 5.5       • Google Earth Engine (extragere rastere)              │
-│   Gemini 3.8 / 4        • Google Colab GPU (rețea FTW pe A100)                 │
-│                         • PC Local CPU (LightGBM, SHAP, geopandas)             │
-│          ▲                        │                                            │
-│          │                        ▼                                            │
-│   [4. SALVEAZĂ STAREA] ◄── [3. VERIFICARE UMANĂ LA PUNCT DE OPRIRE]           │
-│   git commit + push     Agentul expune diagnosticul numeric exact;             │
-│   STATUS.md, DECIZII.md OMUL decide direcția și aprobă modificarea.            │
-└────────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph Operator["👨‍💻 1. OPERATORUL UMAN (Arhitect & Decident)"]
+        Goal["🎯 Definire obiectiv & ipoteze științifice"]
+        AuditCheckpoint{"🛑 3. PUNCT DE CONTROL UMAN\nInspecție cifre & diagnostic"}
+        HumanDecision["⚖️ Decizie umană:\nAprobare / Respingere / Rafinare"]
+    end
+
+    subgraph EnvIDE["⚡ 2. MEDIUL DE DEZVOLTARE (Antigravity IDE)"]
+        Agents["🧠 Creier Multimodal\nClaude Opus 5.5 + Gemini"]
+        CodeTool["💻 Generare scripturi automate\nPython, GEE API, SQL, vizualizări"]
+    end
+
+    subgraph Infrastructure["⚙️ EXECUȚIE EXTERNĂ (Calcul 0 €)"]
+        GEE["🌍 Google Earth Engine\nExtragere serii satelitare & ERA5"]
+        Colab["🚀 Google Colab (GPU)\nRulare model neural FTW"]
+        LocalCPU["🖥️ PC Local (CPU)\nLightGBM, test placebo radar, rapoarte"]
+    end
+
+    subgraph Storage["📦 4. PERSISTENȚĂ & AUDITABILITATE"]
+        StatusMD["📝 STATUS.md (stare & etape)"]
+        DeciziiMD["📜 DECIZII.md (38 decizii înregistrate)"]
+        GitCommit["🐙 Git & GitHub (trasabilitate cod)"]
+    end
+
+    %% Conexiuni flux
+    Goal --> Agents
+    Agents --> CodeTool
+    CodeTool --> GEE
+    CodeTool --> Colab
+    CodeTool --> LocalCPU
+
+    GEE --> AuditCheckpoint
+    Colab --> AuditCheckpoint
+    LocalCPU --> AuditCheckpoint
+
+    AuditCheckpoint -->|Rezultate & Diagrame| HumanDecision
+
+    HumanDecision -->|❌ Erori detectate / Ajustare ipoteză| Agents
+    HumanDecision -->|✅ Validat conform criteriilor| StatusMD
+    StatusMD --> DeciziiMD
+    DeciziiMD --> GitCommit
 ```
 
 > [!TIP]  
