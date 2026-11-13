@@ -10,11 +10,12 @@
 ## 🌟 Livrabil Principal: Prezentarea Oficială
 
 > [!IMPORTANT]  
-> ### 📥 [DESCARCĂ PREZENTAREA FINALĂ (.PPTX)](https://github.com/lefterpatrickandrei-sketch/gisday2026/raw/main/ppt/Atlasul%20secetei%20din%202024%20%E2%80%94%20v4%20(animatii).pptx)
-> **Fișier:** `Atlasul secetei din 2024 — v4 (animatii).pptx` *(25,7 MB, 13 slide-uri)*  
+> ### 📦 [DESCARCĂ PREZENTAREA COMPLETĂ (.ZIP — recomandat pentru telefon și PC)](https://github.com/lefterpatrickandrei-sketch/atlas-seceta-2024/raw/main/ppt/Atlasul_secetei_2024_v4_animatii.zip)
+> **Arhivă:** `Atlasul_secetei_2024_v4_animatii.zip` → conține `Atlasul secetei din 2024 — v4 (animatii).pptx` *(25,7 MB, 13 slide-uri)*  
 > ✨ **Include:** Ambele clipuri video încorporate nativ (zbor 3D 50s + evoluție multianuală 20s), tranziții inteligente (**Morph** & **Fade** prin negru), animații sincronizate de apariție, file interactive de navigare pe marginea din dreapta, **IC 95% (27–34%)**, date INS Dolj/Olt, Anexa A cu testele de robustețe, planșa Stereo 70 și notițele complete ale vorbitorului (*speaker notes*).  
+> 💡 *Formatul `.zip` protejează animațiile și tranzițiile Morph împotriva previzualizărilor de pe telefon care le pot elimina la descărcarea directă.*
 > 
-> 🔗 [Deschide fișierul în interfața GitHub](https://github.com/lefterpatrickandrei-sketch/gisday2026/blob/main/ppt/Atlasul%20secetei%20din%202024%20%E2%80%94%20v4%20(animatii).pptx)
+> 🔗 [Deschide `.zip` în GitHub](https://github.com/lefterpatrickandrei-sketch/atlas-seceta-2024/blob/main/ppt/Atlasul_secetei_2024_v4_animatii.zip) · [Descarcă direct `.pptx`](https://github.com/lefterpatrickandrei-sketch/atlas-seceta-2024/raw/main/ppt/Atlasul%20secetei%20din%202024%20%E2%80%94%20v4%20(animatii).pptx)
 
 ### 🔗 Linkuri Rapide & Resurse Digitale
 * 🌍 **Hartă Web Interactivă (Live):** [https://lefterpatrickandrei-sketch.github.io/atlas-seceta-2024/](https://lefterpatrickandrei-sketch.github.io/atlas-seceta-2024/)
@@ -298,6 +299,7 @@ gisday2026/
 ├── gisday_config.py                                   # Coordonate AOI, parametri satelitari și CRS
 │
 ├── ppt/                                               # LIVRABILELE PREZENTĂRII
+│   ├── Atlasul_secetei_2024_v4_animatii.zip           # 📦 ARHIVA OFICIALĂ PENTRU DESCĂRCARE SIGURĂ
 │   ├── Atlasul secetei din 2024 — v4 (animatii).pptx  # ⭐ PREZENTAREA OFICIALĂ v4 CU VIDEO, ANIMAȚII ȘI NAVIGARE
 │   ├── _audit/                                        # Fișiere de verificare a integrității datelor
 │   │   ├── audit.md                                   # Matricea completă a afirmațiilor validate
