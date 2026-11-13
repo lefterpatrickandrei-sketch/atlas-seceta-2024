@@ -21,7 +21,7 @@
 * 🌍 **Hartă Web Interactivă (Live):** [https://lefterpatrickandrei-sketch.github.io/atlas-seceta-2024/](https://lefterpatrickandrei-sketch.github.io/atlas-seceta-2024/)
 * 📋 **Audit de Adevăr & Verificare Cifre:** [`ppt/_audit/audit.md`](ppt/_audit/audit.md)
 * 📜 **Transcriere Completă Conversație & Q&A Gemini:** [`docs/conversatie_gemini/evaluare_prezentare_gis_day.md`](docs/conversatie_gemini/evaluare_prezentare_gis_day.md)
-* ⚙️ **Registru de Decizii Tehnice (38 decizii validate):** [`DECIZII.md`](DECIZII.md)
+* ⚙️ **Registru de Decizii Tehnice (39 decizii validate):** [`DECIZII.md`](DECIZII.md)
 
 ---
 
@@ -79,16 +79,16 @@ flowchart LR
 
 | Slide | Titlu Planșă | Fundal | Element Cheie / Dinamică | Timp Recomandat |
 |:---:|---|:---:|---|:---:|
-| **1** | **Coperta: Atlasul secetei din 2024** | Crem | Apariție succesivă cifre (17.466, 30%, ≈0) + lupă detaliu | 0:20 – 0:45 |
-| **2** | **Planșa 2 · Zona și Întrebarea** | Crem | Tranziție **Morph** lupă localizare Sadova–Corabia (Stereo 70) | 0:45 – 1:30 |
-| **3** | **Planșa 3 · Vara lui 2024 (Contextul)** | Crem | Tranziție **Morph** pe graficul ERA5-Land (iunie–august) | 1:30 – 2:15 |
-| **4** | **Planșa 4 · Harta în Mișcare** | **Negru** | **VIDEO 1 AUTOPLAY (50s, buclă):** ridicare 3D proporțională cu pierderea | 2:15 – 3:15 |
-| **5** | **Planșa 5 · Rezultatul** | Crem | 30% (IC 95%: 27–34%) vs. ≈0% + 3 click-uri verdicte + QR | 3:15 – 4:00 |
-| **6** | **Planșa 6 · Cum am lucrat** | Crem | Tranziție **Morph**; bucla agentică, erorile oprite, cost 0 € | 4:00 – 4:50 |
-| **7** | **Planșa 7 · Metoda în 5 pași** | Crem | Tranziție **Morph**; 5 pași + click capcana rotației (10.771) | 4:50 – 5:45 |
-| **8** | **Planșa 8 · Filmul TPROD 2017–2024** | **Negru** | **VIDEO 2 AUTOPLAY (20s):** Seria temporală și prăbușirea din 2024 | 5:45 – 6:30 |
-| **9** | **Planșa 9 · Testele Ipotezelor** | Crem | 3 click-uri: Teren $R^2 \approx 0$, Radar placebo picat, Calendar confirmat | 6:30 – 7:30 |
-| **10** | **Planșa 10 · Concluzii** | Crem | Tranziție **Morph**; 3 concluzii pe click, INS Dolj/Olt, cod QR | 7:30 – 8:15 |
+| **1** | **Coperta: Atlasul secetei din 2024** | Crem | Apariție succesivă cifre (17.466, 30%, ≈0) + lupă detaliu | 0:00 – 0:20 |
+| **2** | **Planșa 2 · Zona și Întrebarea** | Crem | Tranziție **Morph** lupă localizare Sadova–Corabia (Stereo 70) | 0:20 – 1:05 |
+| **3** | **Planșa 3 · Vara lui 2024 (Contextul)** | Crem | Tranziție **Morph** pe graficul ERA5-Land (iunie–august) | 1:05 – 1:50 |
+| **4** | **Planșa 4 · Harta în Mișcare** | **Negru** | **VIDEO 1 AUTOPLAY (50s, buclă):** ridicare 3D proporțională cu pierderea | 1:50 – 2:40 |
+| **5** | **Planșa 5 · Rezultatul** | Crem | 30% (IC 95%: 27–34%) vs. ≈0% + 3 click-uri verdicte + QR | 2:40 – 3:40 |
+| **6** | **Planșa 6 · Cum am lucrat** | Crem | Tranziție **Morph**; bucla agentică, erorile oprite, cost 0 € | 3:40 – 4:30 |
+| **7** | **Planșa 7 · Metoda în 5 pași** | Crem | Tranziție **Morph**; 5 pași + click capcana rotației (10.771) | 4:30 – 5:30 |
+| **8** | **Planșa 8 · Filmul TPROD 2017–2024** | **Negru** | **VIDEO 2 AUTOPLAY (20s):** Seria temporală și prăbușirea din 2024 | 5:30 – 6:00 |
+| **9** | **Planșa 9 · Testele Ipotezelor** | Crem | 3 click-uri: Teren $R^2 \approx 0$, Radar placebo picat, Calendar confirmat | 6:00 – 7:30 |
+| **10** | **Planșa 10 · Concluzii** | Crem | Tranziție **Morph**; 3 concluzii pe click, INS Dolj/Olt, cod QR | 7:30 – 8:20 |
 | **11** | **Anexa A · Cât de solide sunt cifrele** | Crem | Grafic robustețe (lăsare an, prag NDVI, QFLAG) & bare INS | La întrebări |
 | **12** | **Anexa B · Detalii Tehnice** | Crem | Parametri GroupKFold, LightGBM, formula radar, volume calcul | La întrebări |
 | **13** | **Anexa C · Plan și Realitate** | Crem | Infrastructură: plafoane GEE, Colab, renunțare Galileo/CNN sol | La întrebări |
@@ -176,7 +176,7 @@ flowchart TD
 
     subgraph Storage["📦 4. PERSISTENȚĂ & AUDITABILITATE"]
         StatusMD["📝 STATUS.md (stare & etape)"]
-        DeciziiMD["📜 DECIZII.md (38 decizii înregistrate)"]
+        DeciziiMD["📜 DECIZII.md (39 decizii înregistrate)"]
         GitCommit["🐙 Git & GitHub (trasabilitate cod)"]
     end
 
@@ -213,18 +213,19 @@ Acest ghid verbal este sincronizat cu slide-urile prezentării `.pptx` și preg�
 
 ```
 00:00 ── Planșa 1: Titlul și rezultatul direct (30% vs ~0%)
-00:45 ── Planșa 2: Contextul climatic lunar (iunie–august și 9 iunie)
-01:30 ── Planșa 3: Zona de studiu Stereo 70 și cele 3 ipoteze
-02:15 ── Planșa 4: VIDEO 1 (Zborul 3D pe ecran negru)
-03:15 ── Planșa 5: Sinteza rezultatelor și invitația la codul QR
-04:00 ── Planșa 6: Cum am lucrat cu agenții AI (Sfârșitul Părții 1 de 5 min)
+00:20 ── Planșa 2: Zona de studiu Stereo 70 și cele 3 ipoteze
+01:05 ── Planșa 3: Contextul climatic lunar (iunie–august și 9 iunie)
+01:50 ── Planșa 4: VIDEO 1 (Zborul 3D pe ecran negru)
+02:40 ── Planșa 5: Sinteza rezultatelor și invitația la codul QR
+03:40 ── Planșa 6: Cum am lucrat cu agenții AI (Sfârșitul Părții 1 de 5 min)
          │
          ├───► DACĂ AI DOAR 5 MINUTE: Sari direct la Planșa 10 (Concluzii)!
          │
-04:50 ── Planșa 7: Metodologia în 5 pași și capcana rotației (Parcela 10.771)
-05:45 ── Planșa 8: VIDEO 2 (Seria temporală 2017–2024 pe ecran negru)
-06:30 ── Planșa 9: Cele trei teste (Teren R²≈0, Radar placebo, Calendar EOSD)
+04:30 ── Planșa 7: Metodologia în 5 pași și capcana rotației (Parcela 10.771)
+05:30 ── Planșa 8: VIDEO 2 (Seria temporală 2017–2024 pe ecran negru)
+06:00 ── Planșa 9: Cele trei teste (Teren R²≈0, Radar placebo, Calendar EOSD)
 07:30 ── Planșa 10: Concluzii mari, validarea INS și sesiune de întrebări
+08:20 ── Final, întrebări (anexele A–C la nevoie)
 ```
 
 ---
