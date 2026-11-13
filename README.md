@@ -10,11 +10,11 @@
 ## 🌟 Livrabil Principal: Prezentarea Oficială
 
 > [!IMPORTANT]  
-> ### 📥 [DESCARCĂ PREZENTAREA FINALĂ (.PPTX)](https://github.com/lefterpatrickandrei-sketch/gisday2026/raw/main/ppt/Atlasul%20secetei%20din%202024%20%E2%80%94%20FINAL%20(video%20%2B%20animatii%20%2B%20notes).pptx)
-> **Fișier:** `Atlasul secetei din 2024 — FINAL (video + animatii + notes).pptx` *(24,1 MB, 13 slide-uri)*  
-> ✨ **Include:** Ambele clipuri video încorporate nativ (zbor 3D 50s + evoluție multianuală 20s), tranziții inteligente (Morph & Fade prin negru), animații sincronizate de apariție și notițele complete ale vorbitorului (*speaker notes*) calibrate pe minute.  
+> ### 📥 [DESCARCĂ PREZENTAREA FINALĂ (.PPTX)](https://github.com/lefterpatrickandrei-sketch/gisday2026/raw/main/ppt/Atlasul%20secetei%20din%202024%20%E2%80%94%20v4%20(animatii).pptx)
+> **Fișier:** `Atlasul secetei din 2024 — v4 (animatii).pptx` *(25,7 MB, 13 slide-uri)*  
+> ✨ **Include:** Ambele clipuri video încorporate nativ (zbor 3D 50s + evoluție multianuală 20s), tranziții inteligente (**Morph** & **Fade** prin negru), animații sincronizate de apariție, file interactive de navigare pe marginea din dreapta, **IC 95% (27–34%)**, date INS Dolj/Olt, Anexa A cu testele de robustețe, planșa Stereo 70 și notițele complete ale vorbitorului (*speaker notes*).  
 > 
-> 🔗 [Deschide fișierul în interfața GitHub](https://github.com/lefterpatrickandrei-sketch/gisday2026/blob/main/ppt/Atlasul%20secetei%20din%202024%20%E2%80%94%20FINAL%20(video%20%2B%20animatii%20%2B%20notes).pptx)
+> 🔗 [Deschide fișierul în interfața GitHub](https://github.com/lefterpatrickandrei-sketch/gisday2026/blob/main/ppt/Atlasul%20secetei%20din%202024%20%E2%80%94%20v4%20(animatii).pptx)
 
 ### 🔗 Linkuri Rapide & Resurse Digitale
 * 🌍 **Hartă Web Interactivă (Live):** [https://lefterpatrickandrei-sketch.github.io/atlas-seceta-2024/](https://lefterpatrickandrei-sketch.github.io/atlas-seceta-2024/)
@@ -62,33 +62,33 @@ Prezentarea este concepută după principiul alternanței vizuale: **ecrane de i
 
 ```mermaid
 flowchart LR
-    S1["1. Coperta\n(Cifre-cheie)"] --> S2["2. Contextul\n(Clima lunară)"]
-    S2 --> S3["3. Zona & Întrebarea\n(Stereo 70)"]
+    S1["1. Coperta\n(Cifre-cheie)"] --> S2["2. Zona & Întrebarea\n(Stereo 70)"]
+    S2 --> S3["3. Contextul\n(Vara lui 2024)"]
     S3 --> S4["4. VIDEO 1\n(Zbor 3D Parcele)"]
-    S4 --> S5["5. Rezultatul\n(Sinteză 30% vs ~0%)"]
+    S4 --> S5["5. Rezultatul\n(30% vs ~0% · IC 95%)"]
     S5 --> S6["6. Cum am lucrat\n(Bucla Agentică)"]
     S6 --> S7["7. Metoda\n(Cei 5 pași)"]
     S7 --> S8["8. VIDEO 2\n(TPROD 2017–2024)"]
     S8 --> S9["9. Testele\n(Teren, Apă, Calendar)"]
-    S9 --> S10["10. Concluzii\n(Cod QR & INS)"]
-    S10 --> S11["Anexa A\n(Robustețe)"]
+    S9 --> S10["10. Concluzii\n(Cod QR & INS Dolj/Olt)"]
+    S10 --> S11["Anexa A\n(Robustețe & INS)"]
     S10 --> S12["Anexa B\n(Tehnic)"]
     S10 --> S13["Anexa C\n(Plan vs Real)"]
 ```
 
 | Slide | Titlu Planșă | Fundal | Element Cheie / Dinamică | Timp Recomandat |
 |:---:|---|:---:|---|:---:|
-| **1** | **Coperta: Atlasul secetei din 2024** | Crem | Apariție succesivă cifre (17.466, 30%, ≈0) | 0:20 – 0:45 |
-| **2** | **Planșa 2 · Contextul Climatic** | Crem | Tranziție **Morph** pe graficul ERA5-Land (iunie–august) | 0:45 – 1:30 |
-| **3** | **Planșa 3 · Zona și Întrebarea** | Crem | Tranziție **Morph** lupă localizare Sadova–Corabia | 1:30 – 2:15 |
+| **1** | **Coperta: Atlasul secetei din 2024** | Crem | Apariție succesivă cifre (17.466, 30%, ≈0) + lupă detaliu | 0:20 – 0:45 |
+| **2** | **Planșa 2 · Zona și Întrebarea** | Crem | Tranziție **Morph** lupă localizare Sadova–Corabia (Stereo 70) | 0:45 – 1:30 |
+| **3** | **Planșa 3 · Vara lui 2024 (Contextul)** | Crem | Tranziție **Morph** pe graficul ERA5-Land (iunie–august) | 1:30 – 2:15 |
 | **4** | **Planșa 4 · Harta în Mișcare** | **Negru** | **VIDEO 1 AUTOPLAY (50s, buclă):** ridicare 3D proporțională cu pierderea | 2:15 – 3:15 |
-| **5** | **Planșa 5 · Rezultatul** | Crem | Sinteză categorică: 30% primăvară vs. ≈0% toamnă + QR activ | 3:15 – 4:00 |
+| **5** | **Planșa 5 · Rezultatul** | Crem | 30% (IC 95%: 27–34%) vs. ≈0% + 3 click-uri verdicte + QR | 3:15 – 4:00 |
 | **6** | **Planșa 6 · Cum am lucrat** | Crem | Tranziție **Morph**; bucla agentică, erorile oprite, cost 0 € | 4:00 – 4:50 |
-| **7** | **Planșa 7 · Metoda în 5 pași** | Crem | Cei 5 pași deschiși; exemplul parcelei 10.771 (capcana rotației) | 4:50 – 5:45 |
+| **7** | **Planșa 7 · Metoda în 5 pași** | Crem | Tranziție **Morph**; 5 pași + click capcana rotației (10.771) | 4:50 – 5:45 |
 | **8** | **Planșa 8 · Filmul TPROD 2017–2024** | **Negru** | **VIDEO 2 AUTOPLAY (20s):** Seria temporală și prăbușirea din 2024 | 5:45 – 6:30 |
-| **9** | **Planșa 9 · Testele Ipotezelor** | Crem | Cele 3 teste: Teren $R^2 \approx 0$, Radar placebo picat, Calendar confirmat | 6:30 – 7:30 |
-| **10** | **Planșa 10 · Concluzii** | Crem | Cele 3 concluzii mari, validarea INS, cod QR mare pe ecran | 7:30 – 8:15 |
-| **11** | **Anexa A · Cât de solide sunt cifrele** | Crem | Analiză robustețe referință (V101 vs V105) și INS detaliat | La întrebări |
+| **9** | **Planșa 9 · Testele Ipotezelor** | Crem | 3 click-uri: Teren $R^2 \approx 0$, Radar placebo picat, Calendar confirmat | 6:30 – 7:30 |
+| **10** | **Planșa 10 · Concluzii** | Crem | Tranziție **Morph**; 3 concluzii pe click, INS Dolj/Olt, cod QR | 7:30 – 8:15 |
+| **11** | **Anexa A · Cât de solide sunt cifrele** | Crem | Grafic robustețe (lăsare an, prag NDVI, QFLAG) & bare INS | La întrebări |
 | **12** | **Anexa B · Detalii Tehnice** | Crem | Parametri GroupKFold, LightGBM, formula radar, volume calcul | La întrebări |
 | **13** | **Anexa C · Plan și Realitate** | Crem | Infrastructură: plafoane GEE, Colab, renunțare Galileo/CNN sol | La întrebări |
 
@@ -298,7 +298,7 @@ gisday2026/
 ├── gisday_config.py                                   # Coordonate AOI, parametri satelitari și CRS
 │
 ├── ppt/                                               # LIVRABILELE PREZENTĂRII
-│   ├── Atlasul secetei din 2024 — FINAL (...).pptx   # ⭐ PREZENTAREA OFICIALĂ CU VIDEO ȘI ANIMAȚII
+│   ├── Atlasul secetei din 2024 — v4 (animatii).pptx  # ⭐ PREZENTAREA OFICIALĂ v4 CU VIDEO, ANIMAȚII ȘI NAVIGARE
 │   ├── _audit/                                        # Fișiere de verificare a integrității datelor
 │   │   ├── audit.md                                   # Matricea completă a afirmațiilor validate
 │   │   ├── context.md                                 # Cifrele oficiale extrase
