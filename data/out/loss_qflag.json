@@ -1,0 +1,97 @@
+{
+ "definitie": "T4 (ticket robustețe): pierderea din 2024 cu TPROD filtrat după QFLAG HR-VPP, pe toți anii 2017–2024.",
+ "codificare_qflag": "Codificarea QFLAG, citită din metadatele fișierelor (tag-urile Flag_value / Flag_meaning, aceleași în V101 și V105):\n  0 fără date (seria nu a fost procesată), 1 niciun sezon găsit, 2 completat (filled), 3 nefolosit,\n  4 / 5 / 6 calitate scăzută la îngălbenire / vârf / înverzire, 7 / 8 / 9 calitate medie la înverzire / vârf / îngălbenire,\n  10 calitate ridicată.",
+ "prag_parcela": "un an se păstrează dacă ≥ 50% din pixelii TPROD valizi trec pragul",
+ "variante": {
+  "a_toti_pixelii": {
+   "primavara": {
+    "n_parcele": 4973,
+    "mediana_pct": 30.1,
+    "aceleasi_parcele_ca_a": {
+     "n": 4973,
+     "mediana_a_pct": 30.1,
+     "mediana_varianta_pct": 30.1
+    }
+   },
+   "toamna": {
+    "n_parcele": 6075,
+    "mediana_pct": -0.2,
+    "aceleasi_parcele_ca_a": {
+     "n": 6075,
+     "mediana_a_pct": -0.2,
+     "mediana_varianta_pct": -0.2
+    }
+   },
+   "parcele_cu_valoare_pe_an_pct": {
+    "2017": 100.0,
+    "2018": 100.0,
+    "2019": 100.0,
+    "2020": 100.0,
+    "2021": 100.0,
+    "2022": 100.0,
+    "2023": 100.0,
+    "2024": 100.0
+   }
+  },
+  "b_qflag_min_7": {
+   "primavara": {
+    "n_parcele": 4679,
+    "mediana_pct": 30.2,
+    "aceleasi_parcele_ca_a": {
+     "n": 4679,
+     "mediana_a_pct": 30.8,
+     "mediana_varianta_pct": 30.2
+    }
+   },
+   "toamna": {
+    "n_parcele": 5327,
+    "mediana_pct": 1.5,
+    "aceleasi_parcele_ca_a": {
+     "n": 5327,
+     "mediana_a_pct": 1.3,
+     "mediana_varianta_pct": 1.5
+    }
+   },
+   "parcele_cu_valoare_pe_an_pct": {
+    "2017": 59.1,
+    "2018": 96.6,
+    "2019": 98.2,
+    "2020": 95.4,
+    "2021": 90.2,
+    "2022": 91.5,
+    "2023": 72.1,
+    "2024": 94.8
+   }
+  },
+  "c_qflag_10": {
+   "primavara": {
+    "n_parcele": 2024,
+    "mediana_pct": 36.5,
+    "aceleasi_parcele_ca_a": {
+     "n": 2024,
+     "mediana_a_pct": 35.2,
+     "mediana_varianta_pct": 36.5
+    }
+   },
+   "toamna": {
+    "n_parcele": 2435,
+    "mediana_pct": 6.2,
+    "aceleasi_parcele_ca_a": {
+     "n": 2435,
+     "mediana_a_pct": 6.8,
+     "mediana_varianta_pct": 6.2
+    }
+   },
+   "parcele_cu_valoare_pe_an_pct": {
+    "2017": 2.5,
+    "2018": 67.1,
+    "2019": 64.9,
+    "2020": 47.8,
+    "2021": 49.7,
+    "2022": 54.2,
+    "2023": 29.9,
+    "2024": 58.8
+   }
+  }
+ }
+}

@@ -1,0 +1,81 @@
+{
+ "definitie": "mediana loss_rel × 100 pe arabil, referința 2017–2023 fără anul indicat; aceeași procedură ca robustete_referinta.py",
+ "pe_grupe": {
+  "primavara": {
+   "oficial_2017_2023": {
+    "n_parcele": 4973,
+    "mediana_pct": 30.1
+   },
+   "fara_2017": {
+    "n_parcele": 4811,
+    "mediana_pct": 29.7
+   },
+   "fara_2018": {
+    "n_parcele": 4702,
+    "mediana_pct": 28.0
+   },
+   "fara_2019": {
+    "n_parcele": 4602,
+    "mediana_pct": 28.1
+   },
+   "fara_2020": {
+    "n_parcele": 4547,
+    "mediana_pct": 34.4
+   },
+   "fara_2021": {
+    "n_parcele": 4785,
+    "mediana_pct": 29.1
+   },
+   "fara_2022": {
+    "n_parcele": 4270,
+    "mediana_pct": 33.0
+   },
+   "fara_2023": {
+    "n_parcele": 4906,
+    "mediana_pct": 30.0
+   },
+   "interval_fara_un_an_pct": [
+    28.0,
+    34.4
+   ]
+  },
+  "toamna": {
+   "oficial_2017_2023": {
+    "n_parcele": 6075,
+    "mediana_pct": -0.2
+   },
+   "fara_2017": {
+    "n_parcele": 5951,
+    "mediana_pct": 0.6
+   },
+   "fara_2018": {
+    "n_parcele": 5901,
+    "mediana_pct": 1.2
+   },
+   "fara_2019": {
+    "n_parcele": 5987,
+    "mediana_pct": 1.1
+   },
+   "fara_2020": {
+    "n_parcele": 5956,
+    "mediana_pct": 1.1
+   },
+   "fara_2021": {
+    "n_parcele": 5994,
+    "mediana_pct": -3.6
+   },
+   "fara_2022": {
+    "n_parcele": 5878,
+    "mediana_pct": 3.2
+   },
+   "fara_2023": {
+    "n_parcele": 5996,
+    "mediana_pct": -2.4
+   },
+   "interval_fara_un_an_pct": [
+    -3.6,
+    3.2
+   ]
+  }
+ }
+}

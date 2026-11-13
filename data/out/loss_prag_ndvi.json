@@ -1,0 +1,46 @@
+{
+ "definitie": "Doar test de sensibilitate; clasificarea oficială (D21, D26 pct. 6) nu se schimbă. Pentru fiecare prag t: grupa din fiecare an (2017–2024) = toamnă dacă NDVI aprilie ≥ t, altfel primăvară (`crop_group` cu ambele praguri = t). Grupul incert din 2024 se mută odată cu pragul: banda [t − 0,02; t + 0,05] (la t = 0,40 e banda oficială 0,38–0,45), plus codul EUCROPMAP 250. Pierderea: `like_for_like_loss`, minimum 2 ani comparabili, tăiere P1/P99 pe arabil, ca în `robustete_referinta.py`. La t = 0,40 trebuie să iasă ținta oficială.",
+ "pe_praguri": {
+  "0.35": {
+   "primavara": {
+    "n_parcele": 3861,
+    "mediana_pct": 28.3
+   },
+   "toamna": {
+    "n_parcele": 6584,
+    "mediana_pct": 1.9
+   },
+   "grup_incert_n": 1470,
+   "grupa_2024_schimbata_fata_de_0_40": {
+    "grup_incert->toamna": 469,
+    "primavara->grup_incert": 903
+   }
+  },
+  "0.40": {
+   "primavara": {
+    "n_parcele": 4973,
+    "mediana_pct": 30.1
+   },
+   "toamna": {
+    "n_parcele": 6075,
+    "mediana_pct": -0.2
+   },
+   "grup_incert_n": 1036
+  },
+  "0.45": {
+   "primavara": {
+    "n_parcele": 5794,
+    "mediana_pct": 31.3
+   },
+   "toamna": {
+    "n_parcele": 5649,
+    "mediana_pct": -1.2
+   },
+   "grup_incert_n": 845,
+   "grupa_2024_schimbata_fata_de_0_40": {
+    "grup_incert->primavara": 538,
+    "toamna->grup_incert": 347
+   }
+  }
+ }
+}

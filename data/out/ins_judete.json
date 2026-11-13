@@ -1,0 +1,96 @@
+{
+ "sursa": {
+  "AGR109A": {
+   "tabel": "Productia agricola vegetala la principalele culturi, pe forme de proprietate, macroregiuni, regiuni de dezvoltare si judete",
+   "ultima_actualizare_INS": "29-06-2026",
+   "adresa": "http://statistici.insse.ro:8077/tempo-ins/matrix/AGR109A"
+  },
+  "AGR108A": {
+   "tabel": "Suprafata cultivata cu principalele culturi, pe forme de proprietate, macroregiuni, regiuni de dezvoltare si judete",
+   "ultima_actualizare_INS": "29-06-2026",
+   "adresa": "http://statistici.insse.ro:8077/tempo-ins/matrix/AGR108A"
+  }
+ },
+ "accesat": "2026-11-13",
+ "nota": "randament = producție / suprafață cultivată, calculat; forma de proprietate Total",
+ "rezultate": {
+  "Dolj": {
+   "floarea-soarelui": {
+    "randament_2024_t_ha": 1.3,
+    "randament_2023_t_ha": 2.01,
+    "randament_medie_2017_2023_t_ha": 2.52,
+    "randament_2024_vs_2023_pct": -35.5,
+    "randament_2024_vs_medie_2017_2023_pct": -48.5,
+    "productie_2024_vs_2023_pct": -38.2
+   },
+   "grau": {
+    "randament_2024_t_ha": 4.02,
+    "randament_2023_t_ha": 3.96,
+    "randament_medie_2017_2023_t_ha": 4.19,
+    "randament_2024_vs_2023_pct": 1.6,
+    "randament_2024_vs_medie_2017_2023_pct": -4.0,
+    "productie_2024_vs_2023_pct": -0.6
+   },
+   "porumb boabe": {
+    "randament_2024_t_ha": 2.78,
+    "randament_2023_t_ha": 4.47,
+    "randament_medie_2017_2023_t_ha": 5.52,
+    "randament_2024_vs_2023_pct": -37.8,
+    "randament_2024_vs_medie_2017_2023_pct": -49.6,
+    "productie_2024_vs_2023_pct": -31.6
+   }
+  },
+  "Olt": {
+   "floarea-soarelui": {
+    "randament_2024_t_ha": 0.4,
+    "randament_2023_t_ha": 2.02,
+    "randament_medie_2017_2023_t_ha": 2.56,
+    "randament_2024_vs_2023_pct": -80.4,
+    "randament_2024_vs_medie_2017_2023_pct": -84.5,
+    "productie_2024_vs_2023_pct": -60.9
+   },
+   "grau": {
+    "randament_2024_t_ha": 4.14,
+    "randament_2023_t_ha": 4.48,
+    "randament_medie_2017_2023_t_ha": 4.71,
+    "randament_2024_vs_2023_pct": -7.6,
+    "randament_2024_vs_medie_2017_2023_pct": -12.1,
+    "productie_2024_vs_2023_pct": -9.0
+   },
+   "porumb boabe": {
+    "randament_2024_t_ha": 1.21,
+    "randament_2023_t_ha": 4.35,
+    "randament_medie_2017_2023_t_ha": 4.94,
+    "randament_2024_vs_2023_pct": -72.2,
+    "randament_2024_vs_medie_2017_2023_pct": -75.6,
+    "productie_2024_vs_2023_pct": -71.1
+   }
+  },
+  "Total national": {
+   "floarea-soarelui": {
+    "randament_2024_t_ha": 1.21,
+    "randament_2023_t_ha": 1.87,
+    "randament_medie_2017_2023_t_ha": 2.42,
+    "randament_2024_vs_2023_pct": -35.1,
+    "randament_2024_vs_medie_2017_2023_pct": -49.8,
+    "productie_2024_vs_2023_pct": -25.2
+   },
+   "grau": {
+    "randament_2024_t_ha": 4.09,
+    "randament_2023_t_ha": 4.15,
+    "randament_medie_2017_2023_t_ha": 4.34,
+    "randament_2024_vs_2023_pct": -1.5,
+    "randament_2024_vs_medie_2017_2023_pct": -5.7,
+    "productie_2024_vs_2023_pct": -3.5
+   },
+   "porumb boabe": {
+    "randament_2024_t_ha": 2.83,
+    "randament_2023_t_ha": 3.98,
+    "randament_medie_2017_2023_t_ha": 5.31,
+    "randament_2024_vs_2023_pct": -28.9,
+    "randament_2024_vs_medie_2017_2023_pct": -46.8,
+    "productie_2024_vs_2023_pct": -31.7
+   }
+  }
+ }
+}
