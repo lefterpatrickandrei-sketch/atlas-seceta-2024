@@ -27,6 +27,9 @@ DEPĂȘIT = rezultatul există, dar a fost calculat pe o țintă care între tim
 
 În afara listei: 03f, canalele OSM, e gata (`6ef00d6`; `data/out/parcel_canals.parquet`, 17.466 de rânduri).
 
+## Un singur repo (D39, 13.11.2026)
+Repo-ul de lucru e acum doar `atlas-seceta-2024` (`origin`); `main` pornește de la `0542168`, iar `gh-pages` (harta web, QR) rămâne neschimbată. `gisday2026` se arhivează; `GEE_PROJECT` rămâne `gisday2026`.
+
 ## Verificări rulate la publicare (D38)
 - **Înainte de push:** 5 fișiere (`.nojekyll`, `README.md`, `index.html`, `date/meta.json`, `date/parcele.geojson.gz`); scanarea după căi locale, token, password, `.env`, chei, e-mailuri, LUCAS, etichete și irigare: NU la toate (GeoJSON-ul scanat decomprimat).
 - **După publicare:** `index.html`, `date/parcele.geojson.gz` și `date/meta.json` răspund cu 200 (`.gz` servit ca `application/gzip`); testul în Edge la 390 px pe adresa publică: parcelele apar, atingerea deschide fereastra, `scrollWidth` = 390, 0 erori în consolă, 1,82 MB transferați.

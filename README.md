@@ -292,10 +292,10 @@ La FIFIM și în comunitatea UGR, întrebările din comisie vizează de regulă 
 ## 📂 Structura Proiectului & Date
 
 ```text
-gisday2026/
+atlas-seceta-2024/
 ├── README.md                                          # Documentul centralizator oficial
 ├── AGENT_BRIEF.md                                     # Ghidul operativ și limitele metodologice
-├── DECIZII.md                                         # Registrul celor 38 de decizii validate
+├── DECIZII.md                                         # Registrul celor 39 de decizii validate
 ├── gisday_config.py                                   # Coordonate AOI, parametri satelitari și CRS
 │
 ├── ppt/                                               # LIVRABILELE PREZENTĂRII
